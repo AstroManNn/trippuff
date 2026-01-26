@@ -258,15 +258,19 @@ display: block;
 }
 .search-bar {
 margin-bottom: 25px;
-position: sticky;
-top: 110px;
+position: fixed;
+top: 105px;
+left: 50%;
+transform: translateX(-50%);
+width: calc(100% - 40px);
+max-width: 600px;
 background-color: var(--bg-color);
 padding: 10px 0;
-z-index: 10;
+z-index: 90;
 transition: transform 0.3s ease, opacity 0.3s ease;
 }
 .search-bar.hidden {
-transform: translateY(-50px);
+transform: translate(-50%, -100%);
 opacity: 0;
 }
 .search-bar input {
@@ -506,6 +510,7 @@ let userData = null;
 let products = [];
 let qrCodeInstance = null;
 let lastScrollPosition = 0;
+let scrollTimeout = null;
 async function initApp() {
 try {
 const initData = Telegram.WebApp.initDataUnsafe;
@@ -695,19 +700,28 @@ displayProducts(filtered);
 }
 function setupScrollListener() {
 const searchBar = document.querySelector('.search-bar');
-const catalogTab = document.getElementById('catalog-tab');
 let isHidden = false;
-catalogTab.addEventListener('scroll', () => {
-const currentScroll = catalogTab.scrollTop;
-if (currentScroll > 100 && !isHidden) {
+let lastScrollY = 0;
+window.addEventListener('scroll', () => {
+const currentScrollY = window.scrollY;
+if (scrollTimeout) {
+clearTimeout(scrollTimeout);
+}
+if (currentScrollY > 150 && !isHidden && currentScrollY > lastScrollY) {
 searchBar.classList.add('hidden');
 isHidden = true;
-} else if (currentScroll <= 100 && isHidden) {
+} else if ((currentScrollY <= 150 || currentScrollY < lastScrollY) && isHidden) {
 searchBar.classList.remove('hidden');
 isHidden = false;
 }
-lastScrollPosition = currentScroll;
-});
+lastScrollY = currentScrollY;
+scrollTimeout = setTimeout(() => {
+if (currentScrollY < lastScrollY && isHidden) {
+searchBar.classList.remove('hidden');
+isHidden = false;
+}
+}, 100);
+}, { passive: true });
 }
 async function openFAQ() {
 document.getElementById('faq-modal').classList.add('active');
@@ -746,4 +760,3 @@ document.addEventListener('DOMContentLoaded', initApp);
 </script>
 </body>
 </html>
-
