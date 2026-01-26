@@ -1,785 +1,748 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#666666">
-    <title>TripPuff</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <style>
-        :root {
-            --primary: #6435c9;
-            --secondary: #4facfe;
-            --success: #00c9a7;
-            --danger: #ff4d4d;
-            --warning: #ffb822;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --border-radius: 16px;
-            --shadow: 0 6px 20px rgba(0,0,0,0.12);
-            --shadow-hover: 0 12px 30px rgba(0,0,0,0.18);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --bg-body: #f5f7ff;
-            --bg-card: #ffffff;
-            --text-primary: #1a1a1a;
-            --text-secondary: #666666;
-            --border-color: #e0e0e0;
-        }
-        
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-primary);
-            padding: 16px;
-            min-height: 100vh;
-            transition: var(--transition);
-            position: relative;
-            overflow-x: hidden;
-            padding-bottom: 80px;
-        }
-        
-        body::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(100, 53, 201, 0.08) 0%, rgba(100, 53, 201, 0) 70%);
-            z-index: -1;
-            transform: rotate(30deg);
-            opacity: 0.7;
-        }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        
-        /* Header Styles */
-        .header {
-            text-align: center;
-            padding: 12px 0;
-            margin-bottom: 28px;
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header h1 {
-            font-size: 28px;
-            font-weight: 800;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0 auto;
-            letter-spacing: -0.5px;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 8px;
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: white;
-            font-size: 18px;
-            overflow: hidden;
-            border: 2px solid var(--primary);
-            position: relative;
-            top: -10px;
-        }
-        
-        .user-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        /* Tabs Styles */
-        .tabs {
-            display: flex;
-            background: var(--bg-card);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-        
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 14px 8px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: var(--transition);
-            position: relative;
-            color: var(--text-secondary);
-        }
-        
-        .tab.active {
-            color: var(--primary);
-        }
-        
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 2px 2px 0 0;
-        }
-        
-        .tab:hover:not(.active) {
-            background-color: rgba(100, 53, 201, 0.05);
-        }
-        
-        /* Card Styles */
-        .product-card {
-            background: var(--bg-card);
-            border-radius: var(--border-radius);
-            overflow: hidden;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
-            position: relative;
-            animation: fadeInUp 0.4s ease-out forwards;
-            touch-action: pan-y;
-            transform: translateX(0);
-            overflow: visible;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
-            z-index: 10;
-        }
-        
-        .product-image-container {
-            height: 160px;
-            background: linear-gradient(45deg, var(--bg-body), var(--bg-card));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .product-image {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            transition: var(--transition);
-        }
-        
-        .product-card:hover .product-image {
-            transform: scale(1.05);
-        }
-        
-        .product-info {
-            padding: 16px;
-            position: relative;
-        }
-        
-        .product-name {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        .product-price {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--success);
-            margin: 8px 0;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        
-        .product-comment {
-            background: rgba(100, 53, 201, 0.08);
-            color: var(--primary);
-            padding: 8px 12px;
-            border-radius: 12px;
-            margin: 12px 0;
-            font-style: italic;
-            font-size: 14px;
-            border-left: 3px solid var(--primary);
-            position: relative;
-        }
-        
-        .product-meta {
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-secondary);
-            font-size: 13px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        .product-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-        
-        .btn {
-            flex: 1;
-            min-width: 100px;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 15px;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            box-shadow: 0 4px 15px rgba(100, 53, 201, 0.4);
-            transform: translateY(-1px);
-        }
-        
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-        
-        .btn-outline:hover {
-            background: rgba(100, 53, 201, 0.1);
-        }
-        
-        .btn-disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-            box-shadow: none !important;
-        }
-        
-        /* Search & Add Product Styles */
-        .search-container {
-            background: var(--bg-card);
-            border-radius: var(--border-radius);
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 14px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 16px;
-            background: var(--bg-body);
-            color: var(--text-primary);
-            transition: var(--transition);
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(100, 53, 201, 0.2);
-        }
-        
-        /* Empty State & Loading */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-        
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            color: var(--primary);
-            opacity: 0.8;
-        }
-        
-        .empty-text {
-            font-size: 16px;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 40px 0;
-        }
-        
-        .spinner-container {
-            position: relative;
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-        }
-        
-        .spinner-wave {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: var(--primary);
-            border-radius: 50%;
-            animation: wave 1.3s ease-in-out infinite;
-        }
-        
-        .spinner-wave:nth-child(1) { left: 0; animation-delay: 0s; }
-        .spinner-wave:nth-child(2) { left: 15px; animation-delay: -0.2s; }
-        .spinner-wave:nth-child(3) { left: 30px; animation-delay: -0.4s; }
-        .spinner-wave:nth-child(4) { left: 45px; animation-delay: -0.6s; }
-        
-        @keyframes wave {
-            0%, 100% { transform: translateY(0); opacity: 0.3; }
-            50% { transform: translateY(-15px); opacity: 1; }
-        }
-        
-        .loading-text {
-            color: var(--primary);
-            font-weight: 600;
-        }
-        
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 12px 24px;
-            border-radius: 50px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            z-index: 10000;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .toast.show {
-            opacity: 1;
-        }
-        
-        /* Fixed search container */
-        .fixed-search-container {
-            position: sticky;
-            top: 110px;
-            background-color: var(--bg-body);
-            padding: 10px 0;
-            z-index: 10;
-            margin-bottom: 20px;
-        }
-        
-        .search-container-fixed {
-            background: var(--bg-card);
-            border-radius: var(--border-radius);
-            padding: 16px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
-        }
-        
-        /* Section transitions */
-        .wishlist-section {
-            transition: opacity 0.3s ease-in-out;
-        }
-        
-        .wishlist-section.fade-out {
-            opacity: 0;
-        }
-        
-        .wishlist-section.fade-in {
-            opacity: 1;
-        }
-        
-        /* Floating Button */
-        .floating-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            box-shadow: 0 6px 20px rgba(100, 53, 201, 0.5);
-            cursor: pointer;
-            z-index: 1000;
-            transition: var(--transition);
-        }
-        
-        .floating-btn:hover {
-            transform: scale(1.1) rotate(10deg);
-            box-shadow: 0 8px 25px rgba(100, 53, 201, 0.6);
-        }
-        
-        @media (max-width: 480px) {
-            .header h1 {
-                font-size: 24px;
-            }
-            
-            .product-image-container {
-                height: 140px;
-            }
-            
-            .product-name {
-                font-size: 16px;
-            }
-            
-            .product-price {
-                font-size: 18px;
-            }
-            
-            .btn {
-                padding: 10px;
-                font-size: 14px;
-            }
-            
-            .floating-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-                bottom: 20px;
-                right: 20px;
-            }
-        }
-        
-        .hidden {
-            display: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#666666">
+<title>TripPuff</title>
+<style>
+:root {
+--bg-color: #e0e0e0;
+--card-bg: #f5f5f5;
+--text-color: #333;
+--primary-color: #666;
+--secondary-color: #999;
+--border-color: #ccc;
+--accent-color: #ff6b6b;
+}
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background-color: var(--bg-color);
+color: var(--text-color);
+line-height: 1.6;
+overscroll-behavior: none;
+padding-bottom: env(safe-area-inset-bottom);
+}
+.screen {
+display: none;
+min-height: 100vh;
+padding-bottom: 20px;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+.screen.active {
+display: block;
+opacity: 1;
+}
+.container {
+max-width: 600px;
+margin: 40px auto;
+padding: 20px;
+text-align: center;
+}
+.welcome-logo {
+margin-bottom: 30px;
+}
+.logo-icon {
+font-size: 64px;
+margin-bottom: 20px;
+}
+.welcome-text {
+color: var(--secondary-color);
+margin-bottom: 40px;
+font-size: 18px;
+line-height: 1.5;
+}
+.form-group {
+margin-bottom: 20px;
+text-align: left;
+}
+.form-group label {
+display: block;
+margin-bottom: 8px;
+font-weight: 500;
+font-size: 16px;
+}
+.form-group input {
+width: 100%;
+padding: 14px;
+border: 2px solid var(--border-color);
+border-radius: 8px;
+font-size: 16px;
+transition: border-color 0.3s;
+}
+.form-group input:focus {
+outline: none;
+border-color: var(--primary-color);
+}
+.btn-primary {
+width: 100%;
+padding: 16px;
+background: linear-gradient(135deg, var(--primary-color), #444);
+color: white;
+border: none;
+border-radius: 8px;
+font-size: 18px;
+font-weight: 600;
+cursor: pointer;
+transition: transform 0.2s, box-shadow 0.2s;
+margin-top: 10px;
+}
+.btn-primary:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 12px rgba(102, 102, 102, 0.3);
+}
+.btn-primary:disabled {
+opacity: 0.6;
+cursor: not-allowed;
+}
+header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 16px 20px;
+background-color: var(--card-bg);
+border-bottom: 1px solid var(--border-color);
+position: sticky;
+top: 0;
+z-index: 100;
+}
+.logo {
+font-size: 24px;
+font-weight: 700;
+background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+.help-icon {
+width: 36px;
+height: 36px;
+background-color: var(--primary-color);
+color: white;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+font-size: 20px;
+cursor: pointer;
+transition: transform 0.2s;
+}
+.help-icon:hover {
+transform: scale(1.1);
+}
+nav {
+display: flex;
+background-color: var(--card-bg);
+border-bottom: 1px solid var(--border-color);
+}
+.tab-btn {
+flex: 1;
+padding: 16px;
+background: none;
+border: none;
+font-size: 16px;
+font-weight: 600;
+cursor: pointer;
+color: var(--secondary-color);
+transition: all 0.3s;
+position: relative;
+}
+.tab-btn.active {
+color: var(--primary-color);
+}
+.tab-btn.active::after {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+width: 100%;
+height: 3px;
+background-color: var(--primary-color);
+}
+.tab-content {
+display: none;
+padding: 20px;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+.tab-content.active {
+display: block;
+opacity: 1;
+}
+.bonus-card {
+background: linear-gradient(135deg, var(--card-bg), #e8e8e8);
+border-radius: 16px;
+padding: 30px;
+text-align: center;
+box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.card-header {
+margin-bottom: 25px;
+}
+.card-header h2 {
+font-size: 24px;
+color: var(--primary-color);
+}
+.qr-container {
+background-color: white;
+border-radius: 12px;
+padding: 25px;
+margin-bottom: 25px;
+box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+#qr-code {
+width: 220px;
+height: 220px;
+margin: 0 auto;
+display: flex;
+align-items: center;
+justify-content: center;
+background-color: white;
+border-radius: 8px;
+}
+#qr-code canvas {
+max-width: 100%;
+max-height: 100%;
+}
+.qr-info {
+margin-top: 15px;
+color: var(--secondary-color);
+font-size: 14px;
+}
+.user-info {
+margin-bottom: 25px;
+}
+.user-info h3 {
+margin-bottom: 8px;
+font-size: 22px;
+color: var(--primary-color);
+}
+.user-info p {
+color: var(--secondary-color);
+font-size: 16px;
+margin-bottom: 5px;
+}
+.referral-code {
+background-color: rgba(102, 102, 102, 0.1);
+padding: 8px 12px;
+border-radius: 6px;
+font-family: 'Courier New', monospace;
+font-size: 14px;
+margin-top: 5px;
+}
+.points {
+margin-top: 20px;
+padding: 20px;
+background: linear-gradient(135deg, white, #f8f8f8);
+border-radius: 12px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.points-label {
+font-weight: 600;
+font-size: 18px;
+color: var(--secondary-color);
+display: block;
+margin-bottom: 10px;
+}
+.points-value {
+font-weight: 700;
+font-size: 36px;
+color: var(--accent-color);
+display: block;
+}
+.search-bar {
+margin-bottom: 25px;
+position: sticky;
+top: 110px;
+background-color: var(--bg-color);
+padding: 10px 0;
+z-index: 10;
+transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.search-bar.hidden {
+transform: translateY(-50px);
+opacity: 0;
+}
+.search-bar input {
+width: 100%;
+padding: 14px 16px;
+border: 2px solid var(--border-color);
+border-radius: 8px;
+font-size: 16px;
+background-color: white;
+transition: border-color 0.3s;
+}
+.search-bar input:focus {
+outline: none;
+border-color: var(--primary-color);
+}
+.products-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+gap: 20px;
+}
+.product-card {
+background-color: white;
+border-radius: 12px;
+padding: 20px;
+text-align: center;
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+cursor: pointer;
+}
+.product-card:hover {
+transform: translateY(-8px);
+box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+}
+.product-image {
+width: 100%;
+height: 160px;
+object-fit: cover;
+border-radius: 8px;
+margin-bottom: 15px;
+background-color: var(--card-bg);
+display: flex;
+align-items: center;
+justify-content: center;
+color: var(--secondary-color);
+font-size: 14px;
+}
+.product-name {
+font-weight: 600;
+margin-bottom: 10px;
+font-size: 16px;
+color: var(--primary-color);
+min-height: 40px;
+}
+.product-price {
+color: var(--accent-color);
+font-weight: 700;
+font-size: 20px;
+margin-bottom: 8px;
+}
+.product-description {
+color: var(--secondary-color);
+font-size: 14px;
+line-height: 1.4;
+min-height: 40px;
+}
+.modal {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0,0,0,0.5);
+z-index: 1000;
+overflow-y: auto;
+transition: opacity 0.3s ease;
+}
+.modal.active {
+display: block;
+}
+.modal-content {
+background-color: white;
+margin: 60px auto 40px;
+padding: 30px;
+border-radius: 16px;
+max-width: 600px;
+box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+.close-btn {
+float: right;
+font-size: 32px;
+font-weight: bold;
+cursor: pointer;
+color: var(--secondary-color);
+transition: color 0.2s;
+}
+.close-btn:hover {
+color: var(--primary-color);
+}
+#faq-content {
+line-height: 1.8;
+}
+#faq-content h3 {
+color: var(--primary-color);
+margin-bottom: 10px;
+font-size: 18px;
+}
+#faq-content p {
+color: var(--text-color);
+margin-bottom: 20px;
+font-size: 15px;
+}
+.no-products {
+text-align: center;
+color: var(--secondary-color);
+padding: 40px;
+font-size: 18px;
+}
+.loading {
+text-align: center;
+padding: 40px;
+color: var(--secondary-color);
+}
+.error-message {
+background-color: #ffebee;
+color: #c62828;
+padding: 15px;
+border-radius: 8px;
+margin: 15px 0;
+text-align: center;
+}
+@media (max-width: 480px) {
+.container {
+margin: 20px;
+padding: 15px;
+}
+.bonus-card {
+padding: 20px 15px;
+}
+#qr-code {
+width: 180px;
+height: 180px;
+}
+.points-value {
+font-size: 28px;
+}
+.product-card {
+padding: 15px;
+}
+}
+</style>
 </head>
-<body class="light-mode">
-    <div class="container">
-        <div class="header">
-            <h1>TripPuff</h1>
-        </div>
-        <div class="user-info">
-            <div class="user-avatar" id="userAvatar">
-                <span id="userInitial">?</span>
-            </div>
-            <span id="userName">Дима</span>
-        </div>
-        <div class="tabs">
-            <div class="tab active" data-tab="bonus">Бонусная карта</div>
-            <div class="tab" data-tab="catalog">Каталог</div>
-        </div>
-        <div id="bonus-tab" class="wishlist-section fade-in">
-            <div class="bonus-card">
-                <div class="card-header">
-                    <h2>Ваша бонусная карта</h2>
-                </div>
-                <div class="points">
-                    <span class="points-label">Баллов:</span>
-                    <span class="points-value" id="points-count">0</span>
-                </div>
-            </div>
-        </div>
-        <div id="catalog-tab" class="wishlist-section fade-out" style="display: none;">
-            <div class="fixed-search-container">
-                <div class="search-container-fixed">
-                    <input type="text" class="search-input" id="searchInput" placeholder="Поиск товаров...">
-                </div>
-            </div>
-            <div class="products-grid" id="products-container">
-                <div class="loading">
-                    <div class="spinner-container">
-                        <div class="spinner-wave"></div>
-                        <div class="spinner-wave"></div>
-                        <div class="spinner-wave"></div>
-                        <div class="spinner-wave"></div>
-                    </div>
-                    <div class="loading-text">Загрузка товаров...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="toast" id="toast">Сообщение</div>
-    
-    <script>
-        // Инициализация Telegram WebApp
-        const WebApp = window.Telegram.WebApp;
-        WebApp.expand();
-        
-        // Глобальные переменные
-        const API_URL = 'https://kh-uin-iazip--Astro1Man.replit.app'; // Замените на ваш адрес
-        let userData = null;
-        let products = [];
-        let currentTab = 'bonus';
-        
-        // DOM элементы
-        const tabs = document.querySelectorAll('.tab');
-        const bonusTab = document.getElementById('bonus-tab');
-        const catalogTab = document.getElementById('catalog-tab');
-        const searchInput = document.getElementById('searchInput');
-        const productsContainer = document.getElementById('products-container');
-        const pointsCount = document.getElementById('points-count');
-        const toast = document.getElementById('toast');
-        const userInitial = document.getElementById('userInitial');
-        const userName = document.getElementById('userName');
-        
-        // Инициализация приложения
-        function initApp() {
-            // Установка данных пользователя
-            userName.textContent = 'Дима';
-            userInitial.textContent = 'Д';
-            
-            // Загрузка товаров
-            loadProducts();
-            
-            // Настройка обработчиков событий
-            setupEventListeners();
-        }
-        
-        // Настройка обработчиков событий
-        function setupEventListeners() {
-            // Переключение вкладок
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const tabName = tab.getAttribute('data-tab');
-                    switchTab(tabName);
-                });
-            });
-            
-            // Поиск
-            searchInput.addEventListener('input', debounce(searchProducts, 300));
-        }
-        
-        // Переключение вкладок с анимацией
-        function switchTab(tabName) {
-            if (currentTab === tabName) return;
-            
-            // Скрытие текущей вкладки
-            const currentSection = currentTab === 'bonus' ? bonusTab : catalogTab;
-            currentSection.classList.remove('fade-in');
-            currentSection.classList.add('fade-out');
-            
-            // Показ новой вкладки
-            const newSection = tabName === 'bonus' ? bonusTab : catalogTab;
-            newSection.style.display = 'block';
-            newSection.classList.remove('fade-out');
-            newSection.classList.add('fade-in');
-            
-            // Обновление активной вкладки
-            tabs.forEach(tab => {
-                tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
-            });
-            
-            currentTab = tabName;
-            
-            // Если переключаемся на каталог, загружаем товары
-            if (tabName === 'catalog' && products.length === 0) {
-                loadProducts();
-            }
-        }
-        
-        // Загрузка товаров
-        function loadProducts() {
-            // Показываем загрузку
-            productsContainer.innerHTML = `
-                <div class="loading">
-                    <div class="spinner-container">
-                        <div class="spinner-wave"></div>
-                        <div class="spinner-wave"></div>
-                        <div class="spinner-wave"></div>
-                        <div class="spinner-wave"></div>
-                    </div>
-                    <div class="loading-text">Загрузка товаров...</div>
-                </div>
-            `;
-            
-            // Имитация загрузки
-            setTimeout(() => {
-                // Генерируем демо данные
-                products = [
-                    {
-                        id: 1,
-                        name: 'POD-система Vaporesso XROS 3',
-                        price: 1490.00,
-                        description: 'Компактная и мощная система для начинающих. Объем резервуара 2мл, мощность до 40Вт.',
-                        image_url: 'https://via.placeholder.com/300x200?text=Vaporesso+XROS+3',
-                        category: 'POD-системы'
-                    },
-                    {
-                        id: 2,
-                        name: 'Жидкость Elfbar Pineapple Ice 50ml',
-                        price: 450.00,
-                        description: 'Ананас со льдом, 5% никотина. Премиальное качество от известного бренда.',
-                        image_url: 'https://via.placeholder.com/300x200?text=Elfbar+Pineapple',
-                        category: 'Жидкости'
-                    },
-                    {
-                        id: 3,
-                        name: 'Тяговый аккумулятор VTC6',
-                        price: 890.00,
-                        description: 'Высокотоковый аккумулятор 3000mAh, 30A. Идеально для мощных устройств.',
-                        image_url: 'https://via.placeholder.com/300x200?text=VTC6+Battery',
-                        category: 'Аккумуляторы'
-                    },
-                    {
-                        id: 4,
-                        name: 'Испаритель для Smok Nord 2',
-                        price: 350.00,
-                        description: 'Сменный испаритель 0.8 ом для насыщенного вкуса и плотного пара.',
-                        image_url: 'https://via.placeholder.com/300x200?text=Smok+Coil',
-                        category: 'Испарители'
-                    },
-                    {
-                        id: 5,
-                        name: 'Подставка для вейпа',
-                        price: 290.00,
-                        description: 'Силиконовая подставка для удобного хранения вашего устройства.',
-                        image_url: 'https://via.placeholder.com/300x200?text=Vape+Stand',
-                        category: 'Аксессуары'
-                    }
-                ];
-                
-                renderProducts(products);
-            }, 800);
-        }
-        
-        // Отображение товаров
-        function renderProducts(productsList) {
-            if (productsList.length === 0) {
-                productsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-box-open"></i>
-                        </div>
-                        <div class="empty-text">
-                            Товары временно отсутствуют
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-            
-            let html = '';
-            productsList.forEach(product => {
-                html += `
-                    <div class="product-card">
-                        <div class="product-image-container">
-                            <img src="${product.image_url}" alt="${product.name}" class="product-image">
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">${product.name}</div>
-                            <div class="product-price">
-                                <i class="fas fa-ruble-sign"></i> ${product.price.toFixed(2)}
-                            </div>
-                            ${product.description ? `
-                                <div class="product-comment">
-                                    ${product.description}
-                                </div>
-                            ` : ''}
-                            <div class="product-meta">
-                                <span><i class="fas fa-tag"></i> ${product.category}</span>
-                            </div>
-                            <div class="product-actions">
-                                <button class="btn btn-outline open-link-btn">
-                                    <i class="fas fa-shopping-cart"></i> Купить
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            productsContainer.innerHTML = html;
-        }
-        
-        // Поиск товаров
-        function searchProducts() {
-            const query = searchInput.value.trim().toLowerCase();
-            if (query.length < 2) {
-                renderProducts(products);
-                return;
-            }
-            
-            const results = products.filter(p => 
-                p.name.toLowerCase().includes(query) || 
-                (p.description && p.description.toLowerCase().includes(query))
-            );
-            
-            renderProducts(results);
-        }
-        
-        // Показать toast уведомление
-        function showToast(message, type = 'info') {
-            toast.textContent = message;
-            toast.className = 'toast';
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-        
-        // Дебаунсинг для поиска
-        function debounce(func, delay) {
-            let timeoutId;
-            return (...args) => {
-                clearTimeout(timeoutId);
-                timeoutId = setTimeout(() => {
-                    func.apply(this, args);
-                }, delay);
-            };
-        }
-        
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+<body>
+<!-- Стартовый экран регистрации -->
+<div id="registration-screen" class="screen active">
+<div class="container">
+<div class="welcome-logo">
+<div class="logo-icon">✈️💨</div>
+<h1>TripPuff</h1>
+</div>
+<p class="welcome-text">Получайте бонусы за покупки!</p>
+<div class="form-group">
+<label for="name">Имя</label>
+<input type="text" id="name" placeholder="Введите ваше имя" required>
+</div>
+<div class="form-group">
+<label for="phone">Номер телефона</label>
+<input type="tel" id="phone" placeholder="+7 (___) ___-__-__" required>
+</div>
+<button class="btn-primary" onclick="registerUser()">Продолжить</button>
+<p style="margin-top: 20px; font-size: 14px; color: var(--secondary-color);">
+Нажимая "Продолжить", вы соглашаетесь с обработкой персональных данных
+</p>
+</div>
+</div>
+<!-- Основной экран приложения -->
+<div id="main-screen" class="screen">
+<!-- Заголовок с иконкой помощи -->
+<header>
+<div class="logo">TripPuff</div>
+<div class="help-icon" onclick="openFAQ()">?</div>
+</header>
+<!-- Навигация -->
+<nav>
+<button class="tab-btn active" onclick="switchTab('bonus')">Бонусная карта</button>
+<button class="tab-btn" onclick="switchTab('catalog')">Каталог</button>
+</nav>
+<!-- Вкладка Бонусная карта -->
+<div id="bonus-tab" class="tab-content active">
+<div class="bonus-card">
+<div class="card-header">
+<h2>Ваша бонусная карта</h2>
+</div>
+<div class="qr-container">
+<div id="qr-code"></div>
+<div class="qr-info">
+<p>Покажите этот код при покупке</p>
+</div>
+</div>
+<div class="user-info">
+<h3 id="user-name"></h3>
+<p id="user-phone"></p>
+<p class="referral-code">Код: <span id="referral-code"></span></p>
+</div>
+<div class="points">
+<span class="points-label">Баллов:</span>
+<span class="points-value" id="points-count">0</span>
+</div>
+</div>
+</div>
+<!-- Вкладка Каталог -->
+<div id="catalog-tab" class="tab-content">
+<div class="search-bar">
+<input type="text" id="search-input" placeholder="Поиск товаров..." oninput="filterProducts()">
+</div>
+<div id="products-container" class="products-grid">
+<div class="loading">Загрузка товаров...</div>
+</div>
+</div>
+</div>
+<!-- Модальное окно FAQ -->
+<div id="faq-modal" class="modal">
+<div class="modal-content">
+<span class="close-btn" onclick="closeFAQ()">&times;</span>
+<h2>Часто задаваемые вопросы</h2>
+<div id="faq-content">
+<div class="loading">Загрузка...</div>
+</div>
+</div>
+</div>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+// ⚠️ ЗАМЕНИ ЭТОТ АДРЕС НА СВОЙ ПОСЛЕ РАЗВЁРТЫВАНИЯ БЭКЕНДА НА REPLIT!
+const API_URL = 'https://astromannn.github.io/trippuff/'; // ← ЗАМЕНИ НА СВОЙ АДРЕС!
+let userData = null;
+let products = [];
+let qrCodeInstance = null;
+let lastScrollPosition = 0;
+async function initApp() {
+try {
+const initData = Telegram.WebApp.initDataUnsafe;
+const userId = initData?.user?.id;
+if (!userId) {
+alert('Откройте приложение через Telegram!');
+return;
+}
+Telegram.WebApp.expand();
+Telegram.WebApp.setHeaderColor('#e0e0e0');
+Telegram.WebApp.setBackgroundColor('#e0e0e0');
+userData = await checkUserRegistration(userId);
+if (userData) {
+showMainScreen();
+loadBonusTab();
+} else {
+showRegistrationScreen();
+}
+} catch (error) {
+console.error('Init error:', error);
+alert('Ошибка инициализации приложения');
+}
+}
+async function checkUserRegistration(userId) {
+try {
+const response = await fetch(`${API_URL}/api/user/${userId}`);
+if (response.ok) {
+const data = await response.json();
+return data;
+}
+} catch (error) {
+console.error('Error checking registration:', error);
+}
+return null;
+}
+function showRegistrationScreen() {
+document.getElementById('main-screen').classList.remove('active');
+setTimeout(() => {
+document.getElementById('registration-screen').classList.add('active');
+}, 300);
+}
+function showMainScreen() {
+document.getElementById('registration-screen').classList.remove('active');
+setTimeout(() => {
+document.getElementById('main-screen').classList.add('active');
+}, 300);
+}
+async function registerUser() {
+const nameInput = document.getElementById('name');
+const phoneInput = document.getElementById('phone');
+const name = nameInput.value.trim();
+const phone = phoneInput.value.trim();
+if (!name) {
+alert('Пожалуйста, введите имя');
+nameInput.focus();
+return;
+}
+if (!phone) {
+alert('Пожалуйста, введите номер телефона');
+phoneInput.focus();
+return;
+}
+const button = event.target;
+button.disabled = true;
+button.textContent = 'Регистрация...';
+const initData = Telegram.WebApp.initDataUnsafe;
+const userId = initData?.user?.id;
+if (!userId) {
+alert('Ошибка: не удалось получить данные пользователя');
+button.disabled = false;
+button.textContent = 'Продолжить';
+return;
+}
+try {
+const response = await fetch(`${API_URL}/api/register`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({ userId, name, phone })
+});
+const data = await response.json();
+if (data.success) {
+userData = data.user;
+showMainScreen();
+loadBonusTab();
+alert('Добро пожаловать в TripPuff! Ваша бонусная карта готова.');
+} else {
+alert(data.message || 'Ошибка регистрации');
+}
+} catch (error) {
+console.error('Registration error:', error);
+alert('Произошла ошибка при регистрации. Проверьте подключение к интернету.');
+} finally {
+button.disabled = false;
+button.textContent = 'Продолжить';
+}
+}
+function switchTab(tabName) {
+document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(tab => {
+tab.classList.remove('active');
+setTimeout(() => {
+if (tab.id === `${tabName}-tab`) {
+tab.classList.add('active');
+}
+}, 300);
+});
+event.target.classList.add('active');
+if (tabName === 'bonus') {
+loadBonusTab();
+} else if (tabName === 'catalog') {
+loadCatalogTab();
+}
+}
+async function loadBonusTab() {
+if (!userData) return;
+document.getElementById('user-name').textContent = userData.name;
+document.getElementById('user-phone').textContent = formatPhone(userData.phone);
+document.getElementById('points-count').textContent = userData.points || 0;
+document.getElementById('referral-code').textContent = userData.referral_code;
+generateQRCode(userData.referral_code);
+}
+function formatPhone(phone) {
+if (phone.startsWith('+7') && phone.length >= 12) {
+return `+7 (${phone.substring(2,5)}) ${phone.substring(5,8)}-${phone.substring(8,10)}-${phone.substring(10,12)}`;
+}
+return phone;
+}
+function generateQRCode(code) {
+const qrContainer = document.getElementById('qr-code');
+qrContainer.innerHTML = '';
+if (qrCodeInstance) {
+qrCodeInstance.clear();
+}
+const qrData = `tripPuff://user/${code}`;
+qrCodeInstance = new QRCode(qrContainer, {
+text: qrData,
+width: 200,
+height: 200,
+correctLevel: QRCode.CorrectLevel.H
+});
+}
+async function loadCatalogTab() {
+const container = document.getElementById('products-container');
+container.innerHTML = '<div class="loading">Загрузка товаров...</div>';
+try {
+const response = await fetch(`${API_URL}/api/products`);
+if (!response.ok) {
+throw new Error('Ошибка загрузки товаров');
+}
+products = await response.json();
+displayProducts(products);
+setupScrollListener();
+} catch (error) {
+console.error('Error loading products:', error);
+container.innerHTML = '<p class="error-message">Ошибка загрузки товаров. Проверьте подключение к интернету.</p>';
+}
+}
+function displayProducts(productsList) {
+const container = document.getElementById('products-container');
+container.innerHTML = '';
+if (productsList.length === 0) {
+container.innerHTML = '<p class="no-products">Товары временно отсутствуют</p>';
+return;
+}
+productsList.forEach(product => {
+const card = document.createElement('div');
+card.className = 'product-card';
+card.innerHTML = `
+${product.image_url ?
+`<img src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}" class="product-image">` :
+`<div class="product-image">Изображение отсутствует</div>`
+}
+<h3 class="product-name">${escapeHtml(product.name)}</h3>
+<p class="product-price">${parseFloat(product.price).toFixed(2)} ₽</p>
+<p class="product-description">${escapeHtml(product.description || 'Описание отсутствует')}</p>
+`;
+container.appendChild(card);
+});
+}
+function filterProducts() {
+const searchTerm = document.getElementById('search-input').value.toLowerCase();
+const filtered = products.filter(p =>
+p.name.toLowerCase().includes(searchTerm) ||
+(p.description && p.description.toLowerCase().includes(searchTerm))
+);
+displayProducts(filtered);
+}
+function setupScrollListener() {
+const searchBar = document.querySelector('.search-bar');
+const catalogTab = document.getElementById('catalog-tab');
+let isHidden = false;
+catalogTab.addEventListener('scroll', () => {
+const currentScroll = catalogTab.scrollTop;
+if (currentScroll > 100 && !isHidden) {
+searchBar.classList.add('hidden');
+isHidden = true;
+} else if (currentScroll <= 100 && isHidden) {
+searchBar.classList.remove('hidden');
+isHidden = false;
+}
+lastScrollPosition = currentScroll;
+});
+}
+async function openFAQ() {
+document.getElementById('faq-modal').classList.add('active');
+const faqContent = document.getElementById('faq-content');
+faqContent.innerHTML = '<div class="loading">Загрузка...</div>';
+try {
+const response = await fetch(`${API_URL}/api/faq`);
+if (!response.ok) {
+throw new Error('Ошибка загрузки FAQ');
+}
+const data = await response.json();
+if (data.length === 0) {
+faqContent.innerHTML = '<p>FAQ временно недоступен</p>';
+return;
+}
+faqContent.innerHTML = data.map(item => `
+<div class="faq-item">
+<h3>${escapeHtml(item.question)}</h3>
+<p>${escapeHtml(item.answer)}</p>
+</div>
+`).join('');
+} catch (error) {
+console.error('Error loading FAQ:', error);
+faqContent.innerHTML = '<p class="error-message">Ошибка загрузки FAQ. Проверьте подключение к интернету.</p>';
+}
+}
+function closeFAQ() {
+document.getElementById('faq-modal').classList.remove('active');
+}
+function escapeHtml(text) {
+const div = document.createElement('div');
+div.textContent = text;
+return div.innerHTML;
+}
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
 </body>
 </html>
