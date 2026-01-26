@@ -2,12 +2,499 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#666666">
     <title>TripPuff</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Библиотека для генерации QR-кодов -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #e0e0e0;
+            --card-bg: #f5f5f5;
+            --text-color: #333;
+            --primary-color: #666;
+            --secondary-color: #999;
+            --border-color: #ccc;
+            --accent-color: #ff6b6b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overscroll-behavior: none;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .welcome-logo {
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .welcome-text {
+            color: var(--secondary-color);
+            margin-bottom: 40px;
+            font-size: 18px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color), #444);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 102, 102, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .help-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .help-icon:hover {
+            transform: scale(1.1);
+        }
+
+        nav {
+            display: flex;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 16px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--secondary-color);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .bonus-card {
+            background: linear-gradient(135deg, var(--card-bg), #e8e8e8);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .card-header {
+            margin-bottom: 25px;
+        }
+
+        .card-header h2 {
+            font-size: 24px;
+            color: var(--primary-color);
+        }
+
+        .qr-container {
+            background-color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        #qr-code {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border-radius: 8px;
+        }
+
+        #qr-code canvas {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .qr-info {
+            margin-top: 15px;
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+
+        .user-info {
+            margin-bottom: 25px;
+        }
+
+        .user-info h3 {
+            margin-bottom: 8px;
+            font-size: 22px;
+            color: var(--primary-color);
+        }
+
+        .user-info p {
+            color: var(--secondary-color);
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .referral-code {
+            background-color: rgba(102, 102, 102, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .points {
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, white, #f8f8f8);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .points-label {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--secondary-color);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .points-value {
+            font-weight: 700;
+            font-size: 36px;
+            color: var(--accent-color);
+            display: block;
+        }
+
+        .referral-program {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(255, 107, 107, 0.1);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .referral-program h4 {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .referral-program p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .referral-program strong {
+            color: var(--accent-color);
+            font-weight: 700;
+        }
+
+        .search-bar {
+            margin-bottom: 25px;
+            position: sticky;
+            top: 110px;
+            background-color: var(--bg-color);
+            padding: 10px 0;
+            z-index: 10;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: white;
+            transition: border-color 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background-color: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: var(--primary-color);
+            min-height: 40px;
+        }
+
+        .product-price {
+            color: var(--accent-color);
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .product-description {
+            color: var(--secondary-color);
+            font-size: 14px;
+            line-height: 1.4;
+            min-height: 40px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 60px auto 40px;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 600px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--secondary-color);
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: var(--primary-color);
+        }
+
+        #faq-content {
+            line-height: 1.8;
+        }
+
+        #faq-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        #faq-content p {
+            color: var(--text-color);
+            margin-bottom: 20px;
+            font-size: 15px;
+        }
+
+        .no-products {
+            text-align: center;
+            color: var(--secondary-color);
+            padding: 40px;
+            font-size: 18px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary-color);
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 20px;
+                padding: 15px;
+            }
+            
+            .bonus-card {
+                padding: 20px 15px;
+            }
+            
+            #qr-code {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .points-value {
+                font-size: 28px;
+            }
+            
+            .product-card {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Стартовый экран регистрации -->
@@ -27,6 +514,9 @@
                 <input type="tel" id="phone" placeholder="+7 (___) ___-__-__" required>
             </div>
             <button class="btn-primary" onclick="registerUser()">Продолжить</button>
+            <p style="margin-top: 20px; font-size: 14px; color: var(--secondary-color);">
+                Нажимая "Продолжить", вы соглашаетесь с обработкой персональных данных
+            </p>
         </div>
     </div>
 
@@ -67,7 +557,7 @@
                 </div>
                 <div class="referral-program">
                     <h4>Реферальная программа</h4>
-                    <p>Пригласите друга по вашему QR-коду и получите <strong>100 баллов</strong> за каждого!</p>
+                    <p>Пригласите друга по вашему коду и получите <strong>100 баллов</strong> за каждого!</p>
                 </div>
             </div>
         </div>
@@ -78,7 +568,7 @@
                 <input type="text" id="search-input" placeholder="Поиск товаров..." oninput="filterProducts()">
             </div>
             <div id="products-container" class="products-grid">
-                <!-- Товары будут загружаться сюда -->
+                <div class="loading">Загрузка товаров...</div>
             </div>
         </div>
     </div>
@@ -89,11 +579,271 @@
             <span class="close-btn" onclick="closeFAQ()">&times;</span>
             <h2>Часто задаваемые вопросы</h2>
             <div id="faq-content">
-                <!-- FAQ будет загружаться сюда -->
+                <div class="loading">Загрузка...</div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        // ⚠️ ЗАМЕНИ ЭТОТ АДРЕС НА СВОЙ ПОСЛЕ РАЗВЁРТЫВАНИЯ БЭКЕНДА НА REPLIT!
+        const API_URL = 'https://trippuff-api.твой-логин.repl.co'; // ← ЗАМЕНИ НА СВОЙ АДРЕС!
+
+        let userData = null;
+        let products = [];
+        let qrCodeInstance = null;
+
+        async function initApp() {
+            try {
+                const initData = Telegram.WebApp.initDataUnsafe;
+                const userId = initData?.user?.id;
+                
+                if (!userId) {
+                    alert('Откройте приложение через Telegram!');
+                    return;
+                }
+                
+                Telegram.WebApp.expand();
+                Telegram.WebApp.setHeaderColor('#e0e0e0');
+                Telegram.WebApp.setBackgroundColor('#e0e0e0');
+                
+                userData = await checkUserRegistration(userId);
+                if (userData) {
+                    showMainScreen();
+                    loadBonusTab();
+                } else {
+                    showRegistrationScreen();
+                }
+            } catch (error) {
+                console.error('Init error:', error);
+                alert('Ошибка инициализации приложения');
+            }
+        }
+
+        async function checkUserRegistration(userId) {
+            try {
+                const response = await fetch(`${API_URL}/api/user/${userId}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    return data;
+                }
+            } catch (error) {
+                console.error('Error checking registration:', error);
+            }
+            return null;
+        }
+
+        function showRegistrationScreen() {
+            document.getElementById('registration-screen').classList.add('active');
+            document.getElementById('main-screen').classList.remove('active');
+        }
+
+        function showMainScreen() {
+            document.getElementById('registration-screen').classList.remove('active');
+            document.getElementById('main-screen').classList.add('active');
+        }
+
+        async function registerUser() {
+            const nameInput = document.getElementById('name');
+            const phoneInput = document.getElementById('phone');
+            
+            const name = nameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            
+            if (!name) {
+                alert('Пожалуйста, введите имя');
+                nameInput.focus();
+                return;
+            }
+            
+            if (!phone) {
+                alert('Пожалуйста, введите номер телефона');
+                phoneInput.focus();
+                return;
+            }
+            
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = 'Регистрация...';
+            
+            const initData = Telegram.WebApp.initDataUnsafe;
+            const userId = initData?.user?.id;
+            
+            if (!userId) {
+                alert('Ошибка: не удалось получить данные пользователя');
+                button.disabled = false;
+                button.textContent = 'Продолжить';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/api/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, name, phone })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    userData = data.user;
+                    showMainScreen();
+                    loadBonusTab();
+                    alert('Добро пожаловать в TripPuff! Ваша бонусная карта готова.');
+                } else {
+                    alert(data.message || 'Ошибка регистрации');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                alert('Произошла ошибка при регистрации. Проверьте подключение к интернету.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Продолжить';
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            if (tabName === 'bonus') {
+                loadBonusTab();
+            } else if (tabName === 'catalog') {
+                loadCatalogTab();
+            }
+        }
+
+        async function loadBonusTab() {
+            if (!userData) return;
+            
+            document.getElementById('user-name').textContent = userData.name;
+            document.getElementById('user-phone').textContent = formatPhone(userData.phone);
+            document.getElementById('points-count').textContent = userData.points || 0;
+            document.getElementById('referral-code').textContent = userData.referral_code;
+            
+            generateQRCode(userData.referral_code);
+        }
+
+        function formatPhone(phone) {
+            if (phone.startsWith('+7') && phone.length >= 12) {
+                return `+7 (${phone.substring(2,5)}) ${phone.substring(5,8)}-${phone.substring(8,10)}-${phone.substring(10,12)}`;
+            }
+            return phone;
+        }
+
+        function generateQRCode(code) {
+            const qrContainer = document.getElementById('qr-code');
+            qrContainer.innerHTML = '';
+            
+            if (qrCodeInstance) {
+                qrCodeInstance.clear();
+            }
+            
+            const qrData = `tripPuff://user/${code}`;
+            
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: qrData,
+                width: 200,
+                height: 200,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        async function loadCatalogTab() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '<div class="loading">Загрузка товаров...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/products`);
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки товаров');
+                }
+                products = await response.json();
+                displayProducts(products);
+            } catch (error) {
+                console.error('Error loading products:', error);
+                container.innerHTML = '<p class="error-message">Ошибка загрузки товаров. Проверьте подключение к интернету.</p>';
+            }
+        }
+
+        function displayProducts(productsList) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+            
+            if (productsList.length === 0) {
+                container.innerHTML = '<p class="no-products">Товары временно отсутствуют</p>';
+                return;
+            }
+            
+            productsList.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    ${product.image_url ? 
+                        `<img src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}" class="product-image">` :
+                        `<div class="product-image">Изображение отсутствует</div>`
+                    }
+                    <h3 class="product-name">${escapeHtml(product.name)}</h3>
+                    <p class="product-price">${parseFloat(product.price).toFixed(2)} ₽</p>
+                    <p class="product-description">${escapeHtml(product.description || 'Описание отсутствует')}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(searchTerm) || 
+                (p.description && p.description.toLowerCase().includes(searchTerm))
+            );
+            displayProducts(filtered);
+        }
+
+        async function openFAQ() {
+            document.getElementById('faq-modal').classList.add('active');
+            
+            const faqContent = document.getElementById('faq-content');
+            faqContent.innerHTML = '<div class="loading">Загрузка...</div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/faq`);
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки FAQ');
+                }
+                const data = await response.json();
+                
+                if (data.length === 0) {
+                    faqContent.innerHTML = '<p>FAQ временно недоступен</p>';
+                    return;
+                }
+                
+                faqContent.innerHTML = data.map(item => `
+                    <div class="faq-item">
+                        <h3>${escapeHtml(item.question)}</h3>
+                        <p>${escapeHtml(item.answer)}</p>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading FAQ:', error);
+                faqContent.innerHTML = '<p class="error-message">Ошибка загрузки FAQ. Проверьте подключение к интернету.</p>';
+            }
+        }
+
+        function closeFAQ() {
+            document.getElementById('faq-modal').classList.remove('active');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>
