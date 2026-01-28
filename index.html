@@ -124,7 +124,7 @@
         .expense-item { padding: 5px 0; border-bottom: 1px solid #eee; }
         .expense-date { font-size: 11px; color: #999; margin-right: 5px; }
 
-        /* ADMIN TABS */
+        /* ADMIN TABS & NEW STYLES */
         .admin-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
         .admin-tab { flex: 1; padding: 10px; background: none; border: none; font-weight: 600; color: #999; cursor: pointer; }
         .admin-tab.active { color: #333; border-bottom: 2px solid #333; }
@@ -133,6 +133,17 @@
         
         .order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #eee; }
         .delete-prod-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; margin-top: 5px; cursor: pointer;}
+        
+        /* Edit Order Styles */
+        .edit-order-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 8px; margin-bottom: 8px; }
+        .edit-controls { display: flex; align-items: center; gap: 8px; }
+        .edit-btn-small { width: 24px; height: 24px; border: none; background: #ddd; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .prod-select-wrapper { display: flex; gap: 10px; margin-bottom: 15px; }
+        .prod-select-wrapper select { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+        
+        /* Stock Control */
+        .stock-control { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+        .stock-input { width: 60px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -167,7 +178,7 @@
     <div id="age-warning-modal" class="modal"><div class="modal-content" style="text-align: center;"><div style="font-size: 40px; margin-bottom: 10px;">🔞</div><h2>Внимание!</h2><p>Учитывайте, что если ваш возраст меньше 18 лет - курьер в праве отказать вам в выдаче товара.</p><button class="btn-primary" onclick="showAddressForm()">Всё понятно, мне есть 18</button><button class="btn-primary btn-danger" onclick="closeModal('age-warning-modal')" style="margin-top: 10px; background: #999;">Отмена</button></div></div>
     <div id="address-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('address-modal')">&times;</span><h2>Оформление</h2><div class="form-group"><label>Адрес доставки</label><textarea id="delivery-address" rows="3"></textarea></div><div class="form-group"><label>Комментарий</label><textarea id="order-comment" rows="2"></textarea></div><button class="btn-primary" onclick="submitOrder()">Подтвердить заказ</button></div></div>
     
-    <!-- ADMIN MODAL (UPDATED) -->
+    <!-- ADMIN MODAL -->
     <div id="admin-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
@@ -225,15 +236,35 @@
         </div>
     </div>
 
-    <!-- ADMIN EDIT ORDER MODAL -->
+    <!-- ADMIN EDIT ORDER MODAL (UPDATED) -->
     <div id="edit-order-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="document.getElementById('edit-order-modal').classList.remove('active')">&times;</span>
-            <h3>Редактировать заказ</h3>
+            <h3>Редактировать заказ #<span id="edit-order-id-display"></span></h3>
             <input type="hidden" id="edit-order-id">
-            <div class="form-group"><label>Адрес</label><textarea id="edit-order-address" rows="3"></textarea></div>
+            
+            <label>Добавить товар в заказ:</label>
+            <div class="prod-select-wrapper">
+                <select id="edit-order-add-select"></select>
+                <button class="btn-primary btn-green" style="width: auto; margin: 0; padding: 0 15px;" onclick="addProdToEditOrder()">+</button>
+            </div>
+
+            <div id="edit-order-items-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
+
+            <div class="form-group" style="display: flex; gap: 10px; align-items: flex-end;">
+                <div style="flex: 1;">
+                    <label>Скидка (%)</label>
+                    <input type="number" id="edit-order-discount" value="0" min="0" max="100" oninput="recalcEditTotal()">
+                </div>
+                <div style="flex: 1; text-align: right; font-weight: bold; font-size: 18px; padding-bottom: 10px;">
+                    Итого: <span id="edit-order-total">0</span> ₽
+                </div>
+            </div>
+
+            <div class="form-group"><label>Адрес</label><textarea id="edit-order-address" rows="2"></textarea></div>
             <div class="form-group"><label>Комментарий</label><textarea id="edit-order-comment" rows="2"></textarea></div>
-            <button class="btn-primary" onclick="saveOrderChanges()">Сохранить</button>
+            
+            <button class="btn-primary" onclick="saveOrderChanges()">Сохранить изменения</button>
         </div>
     </div>
 
@@ -242,6 +273,7 @@
     <script>
         const API_URL = 'https://ytiiiipuff-production.up.railway.app'; 
         let userData = null, products = [], cart = [], currentCategory = 'all';
+        let currentEditItems = []; // For order editing
 
         const phoneInput = document.getElementById('phone');
         phoneInput.addEventListener('input', function(e) { this.value = this.value.replace(/\D/g, ''); });
@@ -290,7 +322,7 @@
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         async function openFAQ() { document.getElementById('faq-modal').classList.add('active'); const res = await fetch(`${API_URL}/api/faq`); document.getElementById('faq-content').innerHTML = (await res.json()).map(i => `<div><h3>${i.question}</h3><p>${i.answer}</p></div>`).join(''); }
 
-        // --- NEW ADMIN LOGIC ---
+        // --- ADMIN LOGIC ---
         function switchAdminTab(tab) {
             document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
@@ -351,14 +383,41 @@
         async function loadAdminProducts() {
             const container = document.getElementById('admin-products-list');
             container.innerHTML = 'Загрузка...';
-            const res = await fetch(`${API_URL}/api/products`);
-            const prods = await res.json();
-            container.innerHTML = prods.map(p => `
-                <div style="border-bottom:1px solid #eee; padding:5px 0; display:flex; justify-content:space-between;">
-                    <div><b>${p.name}</b> (${p.category})<br>Сток: ${p.stock}</div>
-                    <button class="delete-prod-btn" onclick="deleteProduct(${p.id})">Удалить</button>
-                </div>
-            `).join('');
+            try {
+                const res = await fetch(`${API_URL}/api/products`);
+                const prods = await res.json();
+                products = prods; // Update global for edit order usage
+                container.innerHTML = prods.map(p => `
+                    <div style="border-bottom:1px solid #eee; padding:10px 0;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <b>${p.name}</b> (${p.category})<br>
+                                <span style="color:${p.stock > 0 ? 'green' : 'red'}">Сток: ${p.stock} шт.</span>
+                            </div>
+                            <button class="delete-prod-btn" onclick="deleteProduct(${p.id})">Удалить</button>
+                        </div>
+                        <div class="stock-control">
+                            <input type="number" id="stock-val-${p.id}" class="stock-input" placeholder="Кол-во">
+                            <button class="cat-btn" style="padding: 4px 8px; background: #e0e0e0;" onclick="updateProdStock(${p.id}, 1)">+ Добавить</button>
+                            <button class="cat-btn" style="padding: 4px 8px; background: #e0e0e0;" onclick="updateProdStock(${p.id}, -1)">- Списать</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { container.innerHTML = 'Ошибка'; }
+        }
+
+        async function updateProdStock(id, direction) {
+            const input = document.getElementById(`stock-val-${id}`);
+            const val = parseInt(input.value);
+            if (!val || val <= 0) return alert('Введите количество');
+            const change = direction * val;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/product/stock`, { 
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ userId: userData.telegram_id, productId: id, change: change })
+                });
+                if (res.ok) { input.value = ''; loadAdminProducts(); } else { alert('Ошибка'); }
+            } catch(e) { alert('Ошибка сети'); }
         }
 
         async function deleteProduct(id) {
@@ -386,8 +445,12 @@
                     
                     let buttons = '';
                     if (status === 'active') {
+                        const itemsJson = encodeURIComponent(JSON.stringify(o.items));
                         buttons = `
-                            <button class="btn-blue" onclick="editOrder(${o.id}, '${o.address.replace(/\n/g,' ')}', '${(o.comment||'').replace(/\n/g,' ')}')">Редактировать</button>
+                            <button class="btn-primary btn-danger" style="margin-top: 5px; padding: 8px;" 
+                                onclick="editOrder(${o.id}, '${o.address.replace(/\n/g,' ')}', '${(o.comment||'').replace(/\n/g,' ')}', '${itemsJson}', ${o.total_price})">
+                                Редактировать
+                            </button>
                             <button class="btn-green" style="margin-top:5px; padding:10px; width:100%; border:none; border-radius:5px; color:white; font-weight:bold; cursor:pointer;" onclick="completeOrder(${o.id})">✅ Выполнено</button>
                         `;
                     }
@@ -414,28 +477,89 @@
             loadAdminOrders('active');
         }
 
-        function editOrder(id, addr, cmt) {
+        function editOrder(id, addr, cmt, itemsEncoded, currentTotal) {
             document.getElementById('edit-order-id').value = id;
+            document.getElementById('edit-order-id-display').textContent = id;
             document.getElementById('edit-order-address').value = addr;
             document.getElementById('edit-order-comment').value = cmt;
+            document.getElementById('edit-order-discount').value = 0;
+
+            try { currentEditItems = JSON.parse(decodeURIComponent(itemsEncoded)); } catch(e) { currentEditItems = []; }
+            renderEditItems();
+            recalcEditTotal();
+
+            const select = document.getElementById('edit-order-add-select');
+            select.innerHTML = products.map(p => `<option value="${p.id}">${p.name} (${p.price}₽)</option>`).join('');
+
             document.getElementById('edit-order-modal').classList.add('active');
+        }
+
+        function renderEditItems() {
+            const list = document.getElementById('edit-order-items-list');
+            list.innerHTML = currentEditItems.map((item, index) => `
+                <div class="edit-order-item">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">${item.name}</div>
+                        <div style="font-size:12px; color:#666;">${item.price} ₽</div>
+                    </div>
+                    <div class="edit-controls">
+                        <button class="edit-btn-small" onclick="changeEditItemQty(${index}, -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="edit-btn-small" onclick="changeEditItemQty(${index}, 1)">+</button>
+                        <button class="edit-btn-small" style="background:#ffdddd; color:red;" onclick="removeEditItem(${index})">x</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeEditItemQty(index, change) {
+            currentEditItems[index].quantity += change;
+            if (currentEditItems[index].quantity < 1) currentEditItems[index].quantity = 1;
+            renderEditItems();
+            recalcEditTotal();
+        }
+
+        function removeEditItem(index) {
+            currentEditItems.splice(index, 1);
+            renderEditItems();
+            recalcEditTotal();
+        }
+
+        function addProdToEditOrder() {
+            const select = document.getElementById('edit-order-add-select');
+            const prodId = parseInt(select.value);
+            const product = products.find(p => p.id === prodId);
+            const existing = currentEditItems.find(i => i.product_id === prodId);
+            if (existing) { existing.quantity++; } 
+            else { currentEditItems.push({ product_id: product.id, name: product.name, price: product.price, quantity: 1 }); }
+            renderEditItems();
+            recalcEditTotal();
+        }
+
+        function recalcEditTotal() {
+            let sum = currentEditItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            const discount = parseInt(document.getElementById('edit-order-discount').value) || 0;
+            if (discount > 0) sum = sum - (sum * (discount / 100));
+            document.getElementById('edit-order-total').textContent = Math.ceil(sum);
         }
 
         async function saveOrderChanges() {
             const id = document.getElementById('edit-order-id').value;
             const addr = document.getElementById('edit-order-address').value;
             const cmt = document.getElementById('edit-order-comment').value;
-
-            await fetch(`${API_URL}/api/admin/order/${id}`, { 
-                method: 'PUT', headers: {'Content-Type':'application/json'}, 
-                body: JSON.stringify({ userId: userData.telegram_id, address: addr, comment: cmt }) 
-            });
-            document.getElementById('edit-order-modal').classList.remove('active');
-            loadAdminOrders('active');
+            const total = parseFloat(document.getElementById('edit-order-total').textContent);
+            if (currentEditItems.length === 0) return alert('Заказ не может быть пустым');
+            try {
+                const res = await fetch(`${API_URL}/api/admin/order/${id}`, { 
+                    method: 'PUT', headers: {'Content-Type':'application/json'}, 
+                    body: JSON.stringify({ userId: userData.telegram_id, address: addr, comment: cmt, details: currentEditItems, total_price: total }) 
+                });
+                if(res.ok) { alert('Заказ обновлен!'); document.getElementById('edit-order-modal').classList.remove('active'); loadAdminOrders('active'); } 
+                else { alert('Ошибка сервера'); }
+            } catch(e) { console.error(e); alert('Ошибка сети'); }
         }
 
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
-
