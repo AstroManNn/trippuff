@@ -117,7 +117,6 @@
         .product-price { color: var(--accent-color); font-weight: 700; font-size: 20px; margin-bottom: 8px; }
         .product-description { color: var(--secondary-color); font-size: 14px; margin-bottom: 15px; flex-grow: 1; }
         
-        /* КНОПКА В КОРЗИНУ И УПРАВЛЕНИЕ КОЛИЧЕСТВОМ */
         .add-to-cart-btn {
             background-color: var(--primary-color); color: white; border: none;
             padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;
@@ -189,6 +188,10 @@
             padding-top: 15px;
         }
         .loading { text-align: center; padding: 20px; color: var(--secondary-color); }
+        .out-of-stock {
+            background-color: #ddd; color: #888; padding: 10px; border-radius: 8px;
+            width: 100%; font-weight: 600; cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -306,7 +309,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
-        // ⚠️ ЗАМЕНИ НА АДРЕС СВОЕГО БЭКЕНДА
+        // ⚠️ ЗАМЕНИ НА СВОЙ АДРЕС
         const API_URL = 'https://ytiiiipuff-production.up.railway.app'; 
         
         let userData = null;
@@ -317,7 +320,7 @@
             try {
                 const initData = Telegram.WebApp.initDataUnsafe;
                 const userId = initData?.user?.id;
-                // const userId = 123456789; // для тестов
+                // const userId = 123456789; // Тест
 
                 if (!userId) { alert('Откройте в Telegram!'); return; }
 
@@ -328,7 +331,7 @@
                 if (userData) {
                     showMainScreen();
                     loadBonusTab();
-                    await fetchCart(); // Сначала грузим корзину
+                    await fetchCart();
                 } else {
                     showRegistrationScreen();
                 }
@@ -392,16 +395,12 @@
                 const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`);
                 cart = await res.json();
                 updateCartBadge();
-                // Если каталог уже открыт, перерисовываем его, чтобы обновить кнопки
-                if (document.getElementById('catalog-tab').classList.contains('active')) {
-                    filterProducts(); // Используем filterProducts для перерисовки
-                }
+                if (document.getElementById('catalog-tab').classList.contains('active')) filterProducts();
             } catch (e) { console.error(e); }
         }
 
         async function loadCatalog() {
             const container = document.getElementById('products-container');
-            // Если корзина еще не загружена, загружаем её (важно для кнопок)
             if (cart.length === 0) await fetchCart();
 
             if (products.length === 0) {
@@ -411,7 +410,7 @@
                     displayProducts(products);
                 } catch (e) { container.innerHTML = '<p>Ошибка загрузки</p>'; }
             } else {
-                displayProducts(products); // Просто перерисовываем с учетом корзины
+                displayProducts(products);
             }
         }
 
@@ -421,9 +420,13 @@
             
             list.forEach(p => {
                 const cartItem = cart.find(c => c.product_id === p.id);
+                const hasStock = p.stock > 0;
+                
                 let buttonHtml = '';
                 
-                if (cartItem) {
+                if (!hasStock) {
+                    buttonHtml = `<div class="out-of-stock">Нет в наличии</div>`;
+                } else if (cartItem) {
                     buttonHtml = `
                         <div class="qty-control-catalog">
                             <button onclick="changeQtyFromCatalog(${p.id}, -1)">-</button>
@@ -477,17 +480,14 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: userData.telegram_id, productId })
                 });
-                await fetchCart(); // Перезагружаем корзину и кнопки
+                await fetchCart();
             } catch (e) { alert('Ошибка'); }
         }
 
         async function changeQtyFromCatalog(productId, change) {
             Telegram.WebApp.HapticFeedback.impactOccurred('light');
-            if (change === 1) {
-                await addToCart(productId);
-            } else {
-                await removeFromCart(productId);
-            }
+            if (change === 1) await addToCart(productId);
+            else await removeFromCart(productId);
         }
 
         async function removeFromCart(productId, removeAll = false) {
@@ -497,10 +497,7 @@
                     body: JSON.stringify({ userId: userData.telegram_id, productId, removeAll })
                 });
                 await fetchCart();
-                // Если модалка открыта, обновляем её
-                if (document.getElementById('cart-modal').classList.contains('active')) {
-                    openCart(); 
-                }
+                if (document.getElementById('cart-modal').classList.contains('active')) openCart(); 
             } catch (e) { alert('Ошибка'); }
         }
 
