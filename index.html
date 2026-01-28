@@ -32,14 +32,45 @@
         .welcome-logo { margin-bottom: 30px; }
         .logo-icon { font-size: 64px; margin-bottom: 20px; }
         .welcome-text { color: var(--secondary-color); margin-bottom: 40px; font-size: 18px; line-height: 1.5; }
+        
         .form-group { margin-bottom: 20px; text-align: left; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 16px; }
+        
         .form-group input, .form-group textarea {
             width: 100%; padding: 14px; border: 2px solid var(--border-color);
             border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
             background: white; font-family: inherit;
         }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); }
+
+        /* --- НОВЫЙ СТИЛЬ ДЛЯ ТЕЛЕФОНА --- */
+        .phone-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2px 14px;
+            transition: border-color 0.3s;
+        }
+        .phone-input-wrapper:focus-within {
+            border-color: var(--primary-color);
+        }
+        .phone-prefix {
+            font-size: 16px;
+            color: var(--text-color);
+            font-weight: 500;
+            margin-right: 5px;
+            user-select: none;
+        }
+        .phone-input-wrapper input {
+            border: none !important;
+            padding: 12px 0 !important;
+            margin: 0 !important;
+            width: 100%;
+            outline: none !important;
+        }
+
         .btn-primary {
             width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary-color), #444);
             color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 600;
@@ -162,13 +193,12 @@
             border: 2px solid white;
         }
 
-        /* ADMIN ROBOT FAB */
         .admin-fab {
             position: fixed; bottom: 30px; left: 20px;
             width: 50px; height: 50px;
             background: linear-gradient(135deg, #333, #000);
             border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: none; /* Скрыто по умолчанию */
+            display: none;
             align-items: center; justify-content: center;
             color: white; font-size: 24px; cursor: pointer; z-index: 90;
         }
@@ -196,13 +226,12 @@
         .loading { text-align: center; padding: 20px; color: var(--secondary-color); }
         .out-of-stock { background-color: #ddd; color: #888; padding: 10px; border-radius: 8px; width: 100%; font-weight: 600; cursor: not-allowed; }
 
-        /* ADMIN STATS STYLES */
-        .stat-card {
-            background: #f8f8f8; padding: 15px; border-radius: 10px; margin-bottom: 15px;
-        }
+        .stat-card { background: #f8f8f8; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
         .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 16px; }
         .stat-profit { font-size: 24px; font-weight: bold; color: var(--green-color); margin-top: 10px; border-top: 1px solid #ccc; padding-top: 10px; }
         .expense-list { max-height: 150px; overflow-y: auto; margin-top: 10px; font-size: 14px; color: #666; }
+        .expense-item { padding: 5px 0; border-bottom: 1px solid #eee; }
+        .expense-date { font-size: 11px; color: #999; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -219,7 +248,11 @@
             </div>
             <div class="form-group">
                 <label for="phone">Номер телефона</label>
-                <input type="tel" id="phone" placeholder="+7 (___) ___-__-__" required>
+                <!-- НОВОЕ ПОЛЕ ВВОДА -->
+                <div class="phone-input-wrapper">
+                    <span class="phone-prefix">+7</span>
+                    <input type="tel" id="phone" placeholder="(900) 000-00-00" maxlength="10">
+                </div>
             </div>
             <button class="btn-primary" onclick="registerUser()">Продолжить</button>
         </div>
@@ -272,7 +305,6 @@
             </div>
         </div>
         
-        <!-- КНОПКА АДМИНА -->
         <div id="admin-fab" class="admin-fab" onclick="openAdminPanel()">🤖</div>
 
         <div class="cart-fab" onclick="openCart()">
@@ -330,7 +362,6 @@
         </div>
     </div>
 
-    <!-- МОДАЛЬНОЕ ОКНО АДМИНА -->
     <div id="admin-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
@@ -361,6 +392,13 @@
         let cart = [];
         let currentCategory = 'all';
 
+        // --- ОГРАНИЧЕНИЕ ВВОДА ТЕЛЕФОНА ---
+        const phoneInput = document.getElementById('phone');
+        phoneInput.addEventListener('input', function(e) {
+            // Удаляем всё, кроме цифр
+            this.value = this.value.replace(/\D/g, '');
+        });
+
         async function initApp() {
             try {
                 const initData = Telegram.WebApp.initDataUnsafe;
@@ -377,7 +415,6 @@
                     showMainScreen();
                     loadBonusTab();
                     await fetchCart();
-                    // Если админ - показываем кнопку
                     if (userData.is_admin) {
                         document.getElementById('admin-fab').style.display = 'flex';
                     }
@@ -403,13 +440,20 @@
 
         async function registerUser() {
             const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
+            let phoneVal = document.getElementById('phone').value;
+            
+            // ПРОВЕРКА ТЕЛЕФОНА
+            if (!name) return alert('Введите имя');
+            if (phoneVal.length !== 10) return alert('Номер должен содержать 10 цифр (без +7)');
+
+            const fullPhone = '+7' + phoneVal; // Добавляем префикс
+            
             const tgUser = Telegram.WebApp.initDataUnsafe?.user;
-            if (!name || !phone) return alert('Заполните поля');
+            
             const res = await fetch(`${API_URL}/api/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: tgUser.id, name, phone, username: tgUser.username || '' })
+                body: JSON.stringify({ userId: tgUser.id, name, phone: fullPhone, username: tgUser.username || '' })
             });
             const data = await res.json();
             if (data.success) {
@@ -631,7 +675,11 @@
                 
                 let expenseListHtml = '';
                 data.expensesList.forEach(e => {
-                    expenseListHtml += `<div>- ${e.amount}₽ (${e.comment})</div>`;
+                    // ФОРМАТИРОВАНИЕ ДАТЫ
+                    const date = new Date(e.created_at).toLocaleDateString('ru-RU', {
+                        day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+                    expenseListHtml += `<div class="expense-item"><span class="expense-date">[${date}]</span> - ${e.amount}₽ (${e.comment})</div>`;
                 });
                 if (!expenseListHtml) expenseListHtml = '<div>Нет расходов</div>';
 
