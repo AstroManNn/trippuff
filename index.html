@@ -42,6 +42,7 @@
             background: white; font-family: inherit;
         }
         .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); }
+        .form-group input:read-only { background-color: #e0e0e0; color: #777; cursor: not-allowed; }
 
         .phone-input-wrapper {
             display: flex; align-items: center; background: white; border: 2px solid var(--border-color);
@@ -124,7 +125,7 @@
         .expense-item { padding: 5px 0; border-bottom: 1px solid #eee; }
         .expense-date { font-size: 11px; color: #999; margin-right: 5px; }
 
-        /* ADMIN TABS & NEW STYLES */
+        /* ADMIN TABS */
         .admin-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
         .admin-tab { flex: 1; padding: 10px; background: none; border: none; font-weight: 600; color: #999; cursor: pointer; }
         .admin-tab.active { color: #333; border-bottom: 2px solid #333; }
@@ -144,6 +145,13 @@
         /* Stock Control */
         .stock-control { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
         .stock-input { width: 60px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
+
+        /* DB Manager Styles */
+        .db-table-container { overflow-x: auto; margin-top: 10px; background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 5px; }
+        .db-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .db-table th, .db-table td { padding: 8px; border: 1px solid #ddd; text-align: left; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;}
+        .db-table th { background: #f0f0f0; }
+        .db-action-btn { border: none; background: none; cursor: pointer; font-size: 16px; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -180,14 +188,15 @@
     
     <!-- ADMIN MODAL -->
     <div id="admin-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 600px;">
             <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
             <h2>Админ-панель</h2>
             
             <div class="admin-tabs">
-                <button class="admin-tab active" onclick="switchAdminTab('stats')">📊 Статистика</button>
+                <button class="admin-tab active" onclick="switchAdminTab('stats')">📊 Стат</button>
                 <button class="admin-tab" onclick="switchAdminTab('orders')">📦 Заказы</button>
-                <button class="admin-tab" onclick="switchAdminTab('products')">➕ Товары</button>
+                <button class="admin-tab" onclick="switchAdminTab('products')">➕ Товар</button>
+                <button class="admin-tab" onclick="switchAdminTab('db')">💾 БД</button>
             </div>
 
             <!-- TAB 1: STATS -->
@@ -233,10 +242,24 @@
                 <h3 style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px;">Управление товарами</h3>
                 <div id="admin-products-list"></div>
             </div>
+
+            <!-- TAB 4: DATABASE MANAGER -->
+            <div id="admin-db-tab" class="admin-tab-content">
+                <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
+                    <select id="db-table-select" style="flex:1" onchange="loadDbTable()">
+                        <option value="users">Users (Клиенты)</option>
+                        <option value="faq">FAQ</option>
+                        <option value="expenses">Expenses (Расходы)</option>
+                        <option value="products">Products (Товары)</option>
+                    </select>
+                    <button class="btn-primary btn-green" style="width: auto; margin:0; padding:10px;" onclick="openCreateRecordModal()">➕</button>
+                </div>
+                <div id="db-view-container" class="db-table-container">Загрузка...</div>
+            </div>
         </div>
     </div>
 
-    <!-- ADMIN EDIT ORDER MODAL (UPDATED) -->
+    <!-- ADMIN EDIT ORDER MODAL -->
     <div id="edit-order-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="document.getElementById('edit-order-modal').classList.remove('active')">&times;</span>
@@ -268,12 +291,23 @@
         </div>
     </div>
 
+    <!-- DB EDIT MODAL -->
+    <div id="db-edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('db-edit-modal').classList.remove('active')">&times;</span>
+            <h3 id="db-edit-title">Редактирование</h3>
+            <div id="db-edit-fields"></div>
+            <button class="btn-primary" onclick="saveDbRecord()">Сохранить</button>
+        </div>
+    </div>
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
         const API_URL = 'https://ytiiiipuff-production.up.railway.app'; 
         let userData = null, products = [], cart = [], currentCategory = 'all';
-        let currentEditItems = []; // For order editing
+        let currentEditItems = []; 
+        let currentDbTable = '', currentDbId = null;
 
         const phoneInput = document.getElementById('phone');
         phoneInput.addEventListener('input', function(e) { this.value = this.value.replace(/\D/g, ''); });
@@ -330,6 +364,7 @@
             document.getElementById(`admin-${tab}-tab`).classList.add('active');
             if (tab === 'orders') loadAdminOrders('active');
             if (tab === 'products') loadAdminProducts();
+            if (tab === 'db') loadDbTable();
         }
 
         async function openAdminPanel() {
@@ -386,7 +421,7 @@
             try {
                 const res = await fetch(`${API_URL}/api/products`);
                 const prods = await res.json();
-                products = prods; // Update global for edit order usage
+                products = prods;
                 container.innerHTML = prods.map(p => `
                     <div style="border-bottom:1px solid #eee; padding:10px 0;">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -557,6 +592,170 @@
                 if(res.ok) { alert('Заказ обновлен!'); document.getElementById('edit-order-modal').classList.remove('active'); loadAdminOrders('active'); } 
                 else { alert('Ошибка сервера'); }
             } catch(e) { console.error(e); alert('Ошибка сети'); }
+        }
+
+        // --- VISUAL DATABASE MANAGER (NEW) ---
+        let currentDbData = [];
+
+        async function loadDbTable() {
+            currentDbTable = document.getElementById('db-table-select').value;
+            const container = document.getElementById('db-view-container');
+            container.innerHTML = 'Загрузка...';
+            try {
+                const res = await fetch(`${API_URL}/api/admin/db/${currentDbTable}?userId=${userData.telegram_id}`);
+                const data = await res.json();
+                if (data.error) return container.innerHTML = 'Ошибка доступа';
+                if (data.length === 0) {
+                    currentDbData = [];
+                    return container.innerHTML = 'Таблица пуста';
+                }
+
+                currentDbData = data;
+                
+                // Создаем таблицу с кнопками
+                const cols = Object.keys(data[0]);
+                let tableHtml = '<table class="db-table"><thead><tr><th>Действия</th>';
+                cols.forEach(c => tableHtml += `<th>${c}</th>`);
+                tableHtml += '</tr></thead><tbody>';
+                
+                data.forEach((row, idx) => {
+                    tableHtml += '<tr>';
+                    // Кнопки действий
+                    tableHtml += `
+                        <td>
+                            <button class="db-action-btn" onclick="openEditRecord(${idx})">✏️</button>
+                            <button class="db-action-btn" style="color:red;" onclick="deleteDbRecord(${row.id})">🗑️</button>
+                        </td>
+                    `;
+                    cols.forEach(c => {
+                        let val = row[c];
+                        if (typeof val === 'object' && val !== null) val = JSON.stringify(val);
+                        tableHtml += `<td>${val}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                });
+                tableHtml += '</tbody></table>';
+                container.innerHTML = tableHtml;
+
+            } catch(e) { container.innerHTML = 'Ошибка соединения'; }
+        }
+
+        function openEditRecord(idx) {
+            const row = currentDbData[idx];
+            currentDbId = row.id;
+            openDbModal(row);
+        }
+
+        function openCreateRecordModal() {
+            currentDbId = null; // null means CREATE mode
+            
+            // Generate empty template based on current table structure if data exists, else hardcode common fields
+            let template = {};
+            if (currentDbData.length > 0) {
+                Object.keys(currentDbData[0]).forEach(k => template[k] = '');
+            } else {
+                // Fallback if table is empty
+                if (currentDbTable === 'faq') template = { question: '', answer: '' };
+                if (currentDbTable === 'expenses') template = { amount: '', comment: '' };
+            }
+            openDbModal(template);
+        }
+
+        function openDbModal(data) {
+            const container = document.getElementById('db-edit-fields');
+            const title = document.getElementById('db-edit-title');
+            title.textContent = currentDbId ? `Редактирование ID: ${currentDbId}` : 'Новая запись';
+            container.innerHTML = '';
+
+            Object.keys(data).forEach(key => {
+                // Don't show technical fields for creation/editing logic mostly
+                if (key === 'created_at') return;
+
+                const val = data[key];
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                
+                const label = document.createElement('label');
+                label.textContent = key;
+                
+                let input;
+                // If ID, make it read-only
+                if (key === 'id') {
+                    input = document.createElement('input');
+                    input.value = val;
+                    input.readOnly = true;
+                } 
+                // Long text for descriptions/questions
+                else if (key === 'description' || key === 'answer' || key === 'details' || key === 'image_url') {
+                    input = document.createElement('textarea');
+                    input.rows = 3;
+                    input.value = val;
+                } 
+                else {
+                    input = document.createElement('input');
+                    input.value = val;
+                    if (key === 'price' || key === 'purchase_price' || key === 'stock' || key === 'points' || key === 'amount') {
+                        input.type = 'number';
+                    }
+                }
+                
+                input.id = `db-field-${key}`;
+                input.dataset.key = key; // Store key name
+
+                div.appendChild(label);
+                div.appendChild(input);
+                container.appendChild(div);
+            });
+
+            document.getElementById('db-edit-modal').classList.add('active');
+        }
+
+        async function saveDbRecord() {
+            const inputs = document.querySelectorAll('#db-edit-fields [data-key]');
+            const payload = {};
+            inputs.forEach(inp => {
+                if (inp.readOnly) return; // Skip ID
+                payload[inp.dataset.key] = inp.value;
+            });
+
+            // Add ID for context header if create new (user-id) needed? 
+            // We pass payload to backend.
+
+            const method = currentDbId ? 'PUT' : 'POST';
+            const url = currentDbId 
+                ? `${API_URL}/api/admin/db/${currentDbTable}/${currentDbId}`
+                : `${API_URL}/api/admin/db/${currentDbTable}`;
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': userData.telegram_id // Auth header
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (res.ok) {
+                    alert('Сохранено');
+                    document.getElementById('db-edit-modal').classList.remove('active');
+                    loadDbTable();
+                } else {
+                    alert('Ошибка сохранения');
+                }
+            } catch(e) { alert('Ошибка сети'); }
+        }
+
+        async function deleteDbRecord(id) {
+            if(!confirm('Удалить эту запись навсегда?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/db/${currentDbTable}/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'user-id': userData.telegram_id }
+                });
+                if (res.ok) loadDbTable();
+                else alert('Ошибка удаления');
+            } catch(e) { alert('Ошибка сети'); }
         }
 
         document.addEventListener('DOMContentLoaded', initApp);
