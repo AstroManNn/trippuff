@@ -67,9 +67,7 @@
             position: sticky; top: 0; z-index: 100;
         }
         .logo { font-size: 28px; font-weight: 700; text-align: center; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .
-
-help-icon { width: 36px; height: 36px; background-color: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; cursor: pointer; justify-self: end; }
+        .help-icon { width: 36px; height: 36px; background-color: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; cursor: pointer; justify-self: end; }
         nav { display: flex; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
         .tab-btn { flex: 1; padding: 16px; background: none; border: none; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--secondary-color); transition: all 0.3s; position: relative; }
         .tab-btn.active { color: var(--primary-color); }
@@ -98,9 +96,7 @@ help-icon { width: 36px; height: 36px; background-color: var(--primary-color); c
         .product-description { color: var(--secondary-color); font-size: 14px; margin-bottom: 15px; flex-grow: 1; }
         .add-to-cart-btn { background-color: var(--primary-color); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: background 0.2s; width: 100%; }
         .qty-control-catalog { display: flex; justify-content: space-between; align-items: center; background-color: var(--red-color); color: white; border-radius: 8px; padding: 5px; width: 100%; }
-        .
-
-qty-control-catalog button { background: none; border: none; color: white; font-weight: bold; font-size: 18px; padding: 0 15px; cursor: pointer; }
+        .qty-control-catalog button { background: none; border: none; color: white; font-weight: bold; font-size: 18px; padding: 0 15px; cursor: pointer; }
         .qty-control-catalog span { font-weight: 600; }
         .in-cart-text { font-size: 12px; text-transform: uppercase; margin-bottom: 2px; }
         .cart-fab { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-color), #ff4d4d); border-radius: 50%; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; z-index: 90; transition: transform 0.2s; }
@@ -135,9 +131,7 @@ qty-control-catalog button { background: none; border: none; color: white; font-
         .admin-tab-content { display: none; }
         .admin-tab-content.active { display: block; }
         
-        .
-
-order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #eee; }
+        .order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #eee; }
         .delete-prod-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; margin-top: 5px; cursor: pointer;}
     </style>
 </head>
@@ -171,8 +165,7 @@ order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margi
     <div id="faq-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('faq-modal')">&times;</span><h2>Часто задаваемые вопросы</h2><div id="faq-content"></div></div></div>
     <div id="cart-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('cart-modal')">&times;</span><h2>Корзина</h2><div id="cart-items-container"></div><div class="cart-total"><span>Итого:</span><span id="cart-total-price">0 ₽</span></div><button class="btn-primary" onclick="startCheckout()" style="margin-top:20px;">Оформить заказ</button></div></div>
     <div id="age-warning-modal" class="modal"><div class="modal-content" style="text-align: center;"><div style="font-size: 40px; margin-bottom: 10px;">🔞</div><h2>Внимание!</h2><p>Учитывайте, что если ваш возраст меньше 18 лет - курьер в праве отказать вам в выдаче товара.</p><button class="btn-primary" onclick="showAddressForm()">Всё понятно, мне есть 18</button><button class="btn-primary btn-danger" onclick="closeModal('age-warning-modal')" style="margin-top: 10px; background: #999;">Отмена</button></div></div>
-
-<div id="address-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('address-modal')">&times;</span><h2>Оформление</h2><div class="form-group"><label>Адрес доставки</label><textarea id="delivery-address" rows="3"></textarea></div><div class="form-group"><label>Комментарий</label><textarea id="order-comment" rows="2"></textarea></div><button class="btn-primary" onclick="submitOrder()">Подтвердить заказ</button></div></div>
+    <div id="address-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('address-modal')">&times;</span><h2>Оформление</h2><div class="form-group"><label>Адрес доставки</label><textarea id="delivery-address" rows="3"></textarea></div><div class="form-group"><label>Комментарий</label><textarea id="order-comment" rows="2"></textarea></div><button class="btn-primary" onclick="submitOrder()">Подтвердить заказ</button></div></div>
     
     <!-- ADMIN MODAL (UPDATED) -->
     <div id="admin-modal" class="modal">
@@ -235,9 +228,7 @@ order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margi
     <!-- ADMIN EDIT ORDER MODAL -->
     <div id="edit-order-modal" class="modal">
         <div class="modal-content">
-            <span class="close-btn" onclick="document.
-
-getElementById('edit-order-modal').classList.remove('active')">&times;</span>
+            <span class="close-btn" onclick="document.getElementById('edit-order-modal').classList.remove('active')">&times;</span>
             <h3>Редактировать заказ</h3>
             <input type="hidden" id="edit-order-id">
             <div class="form-group"><label>Адрес</label><textarea id="edit-order-address" rows="3"></textarea></div>
@@ -249,7 +240,7 @@ getElementById('edit-order-modal').classList.remove('active')">&times;</span>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
-        const API_URL = 'https://ytiiiipuff-production.up.railway.app'; 
+        const API_URL = 'https://ttrippuufback-production.up.railway.app'; 
         let userData = null, products = [], cart = [], currentCategory = 'all';
 
         const phoneInput = document.getElementById('phone');
@@ -283,37 +274,16 @@ getElementById('edit-order-modal').classList.remove('active')">&times;</span>
         }
         function switchTab(tab) { document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(`${tab}-tab`).classList.add('active'); event.target.classList.add('active'); if (tab === 'catalog') loadCatalog(); }
         function loadBonusTab() { if (!userData) return; document.getElementById('user-name').textContent = userData.name; document.getElementById('user-phone').textContent = userData.phone; document.getElementById('points-count').textContent = userData.points || 0; document.getElementById('referral-code').textContent = userData.referral_code; const qrContainer = document.getElementById('qr-code'); qrContainer.innerHTML = ''; new QRCode(qrContainer, { text: `user:${userData.referral_code}`, width: 200, height: 200 }); }
-        async function fetchCart() { if (!userData) return; try { const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`); cart = await res.
-
-json(); updateCartBadge(); if (document.getElementById('catalog-tab').classList.contains('active')) filterProducts(); } catch (e) {} }
+        async function fetchCart() { if (!userData) return; try { const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`); cart = await res.json(); updateCartBadge(); if (document.getElementById('catalog-tab').classList.contains('active')) filterProducts(); } catch (e) {} }
         async function loadCatalog() { const container = document.getElementById('products-container'); if (cart.length === 0) await fetchCart(); if (products.length === 0) { try { const res = await fetch(`${API_URL}/api/products`); products = await res.json(); displayProducts(products); } catch (e) { container.innerHTML = '<p>Ошибка</p>'; } } else displayProducts(products); }
         function setCategory(cat) { currentCategory = cat; document.querySelectorAll('.cat-btn').forEach(btn => { btn.classList.remove('active'); if (btn.textContent === cat || (cat === 'all' && btn.textContent === 'Все')) btn.classList.add('active'); }); filterProducts(); }
         function filterProducts() { const term = document.getElementById('search-input').value.toLowerCase(); const filtered = products.filter(p => { const matchesSearch = p.name.toLowerCase().includes(term); const matchesCategory = currentCategory === 'all' || p.category === currentCategory; return matchesSearch && matchesCategory; }); displayProducts(filtered); }
-        function displayProducts(list) { const container = document.getElementById('products-container'); container.innerHTML = ''; if (list.length === 0) { container.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Пусто</div>'; return; } list.forEach(p => { const cartItem = cart.find(c => c.product_id === p.id); const hasStock = p.stock > 0; let buttonHtml = ''; if (!hasStock) buttonHtml =ct {
-            width: 100%; padding: 14px; bord else if (cartItem) { buttonHtml =head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#666666">
-    <title>TripPuff</title>
-    <style>
-        :root {
-            --bg-color: #e0e } else buttonHtml =l lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="wid const el = document.createElement('div'); el.className = 'product-card'; el.innerHTML =ort" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, us: 'Фото'}</div><div class="product-name">${p.name}</div><div class="product-price">${p.price} ₽</div><div class="product-description">${p.description}</div>${buttonHtml}`; container.appendChild(el); }); }
+        function displayProducts(list) { const container = document.getElementById('products-container'); container.innerHTML = ''; if (list.length === 0) { container.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Пусто</div>'; return; } list.forEach(p => { const cartItem = cart.find(c => c.product_id === p.id); const hasStock = p.stock > 0; let buttonHtml = ''; if (!hasStock) buttonHtml = `<div class="out-of-stock">Нет в наличии</div>`; else if (cartItem) { buttonHtml = `<div class="qty-control-catalog"><button onclick="changeQtyFromCatalog(${p.id}, -1)">-</button><div style="text-align:center"><div class="in-cart-text">В корзине</div><span>${cartItem.quantity}</span></div><button onclick="changeQtyFromCatalog(${p.id}, 1)">+</button></div>`; } else buttonHtml = `<button class="add-to-cart-btn" onclick="addToCart(${p.id})">В корзину +</button>`; const el = document.createElement('div'); el.className = 'product-card'; el.innerHTML = `<div class="product-image">${p.image_url ? `<img src="${p.image_url}">` : 'Фото'}</div><div class="product-name">${p.name}</div><div class="product-price">${p.price} ₽</div><div class="product-description">${p.description}</div>${buttonHtml}`; container.appendChild(el); }); }
         function updateCartBadge() { const count = cart.reduce((sum, item) => sum + item.quantity, 0); const badge = document.getElementById('cart-badge'); if (count > 0) { badge.style.display = 'flex'; badge.textContent = count; } else badge.style.display = 'none'; }
         async function addToCart(id) { Telegram.WebApp.HapticFeedback.impactOccurred('light'); try { await fetch(`${API_URL}/api/cart/add`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id }) }); await fetchCart(); } catch (e) {} }
         async function changeQtyFromCatalog(id, chg) { if (chg === 1) await addToCart(id); else await removeFromCart(id); }
         async function removeFromCart(id, all = false) { try { await fetch(`${API_URL}/api/cart/remove`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id, removeAll: all }) }); await fetchCart(); if (document.getElementById('cart-modal').classList.contains('active')) openCart(); } catch (e) {} }
-        async function openCart() { await fetchCart(); document.getElementById('cart-modal').classList.add('active'); const container = document.getElementById('cart-items-container'); const totalEl = document.getElementById('cart-total-price'); container.innerHTML = ''; let total = 0; if (cart.length === 0) { container.innerHTML = '<p>Пусто</p>'; totalEl.textContent = '0 ₽'; } else { cart.forEach(i => { const sum = i.price * i.quantity; total += sum; container.innerHTML += width: 100%; padding: 14px; border: 2px solid var(--border-color);
-
-border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
-            background: white; font-family: inherit;
-        }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); }
-
-        .phone-input-wrapper {
-            display: flex; al }); totalEl.textContent = total.toFixed(2) + ' ₽'; } }
+        async function openCart() { await fetchCart(); document.getElementById('cart-modal').classList.add('active'); const container = document.getElementById('cart-items-container'); const totalEl = document.getElementById('cart-total-price'); container.innerHTML = ''; let total = 0; if (cart.length === 0) { container.innerHTML = '<p>Пусто</p>'; totalEl.textContent = '0 ₽'; } else { cart.forEach(i => { const sum = i.price * i.quantity; total += sum; container.innerHTML += `<div class="cart-item"><div class="cart-item-info"><div class="cart-item-title">${i.name}</div><div class="cart-item-price">${i.price} x ${i.quantity} = ${sum}</div></div><div class="cart-controls"><button class="qty-btn" onclick="removeFromCart(${i.product_id})">-</button><span>${i.quantity}</span><button class="qty-btn" onclick="addToCart(${i.product_id})">+</button></div></div>`; }); totalEl.textContent = total.toFixed(2) + ' ₽'; } }
         function startCheckout() { if (cart.length === 0) return alert('Пусто'); document.getElementById('cart-modal').classList.remove('active'); document.getElementById('age-warning-modal').classList.add('active'); }
         function showAddressForm() { document.getElementById('age-warning-modal').classList.remove('active'); document.getElementById('address-modal').classList.add('active'); }
         async function submitOrder() { const addr = document.getElementById('delivery-address').value; if (!addr) return alert('Укажите адрес'); try { const res = await fetch(`${API_URL}/api/order`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, address: addr, comment: document.getElementById('order-comment').value }) }); if ((await res.json()).success) { alert('Заказ оформлен!'); document.getElementById('address-modal').classList.remove('active'); await fetchCart(); } } catch (e) {} }
@@ -339,20 +309,9 @@ border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
                 const data = await res.json();
                 let expList = data.expensesList.map(e => {
                     const d = new Date(e.created_at).toLocaleDateString('ru-RU', {day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit'});
-                    returnne !important; padding: 12px 0 !important; margin: 0 !important; width: 100%; outline: none !important; }
-
+                    return `<div class="expense-item"><span class="expense-date">[${d}]</span> - ${e.amount}₽ (${e.comment})</div>`;
                 }).join('');
-                container.innerHTML =    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#666666">
-    <title>TripPuff</title>
-    <style>
-        :root {
-            --bg-color: #e0e0e0;
-            --card-bg: #f5f5f5;
-            --text-color: #333;
-            --primary-color: #666;
-            --secondary-color: #999;
-            --bor
+                container.innerHTML = `<div class="stat-card"><div class="stat-row"><span>Продажи:</span><span>+${data.revenue} ₽</span></div><div class="stat-row"><span>Закупка:</span><span>-${data.cogs} ₽</span></div><div class="stat-row"><span>Доп. расходы:</span><span>-${data.expenses} ₽</span></div><div class="stat-profit">Чистая прибыль: ${data.netProfit} ₽</div></div><div class="expense-list">${expList || 'Нет расходов'}</div>`;
             } catch (e) { container.innerHTML = 'Ошибка'; }
         }
 
@@ -362,8 +321,7 @@ border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
             if(!amt) return;
             await fetch(`${API_URL}/api/admin/expense`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, amount: amt, comment: cmt }) });
             document.getElementById('expense-amount').value = ''; document.getElementById('expense-comment').value = '';
-
-openAdminPanel();
+            openAdminPanel();
         }
 
         // PRODUCTS MANAGEMENT
@@ -378,8 +336,7 @@ openAdminPanel();
             formData.append('stock', document.getElementById('new-prod-stock').value);
             formData.append('photo', document.getElementById('new-prod-file').files[0]);
 
-            if (!formData.get('name')18px; line-height: 1.5; }
-    !document.getElementById('new-prod-file').files[0]) {
+            if (!formData.get('name') || !formData.get('price') || !document.getElementById('new-prod-file').files[0]) {
                 return alert('Заполните все поля и выберите фото');
             }
 
@@ -436,8 +393,7 @@ openAdminPanel();
                     }
 
                     return `
-
-<div class="order-admin-card">
+                        <div class="order-admin-card">
                             <div style="font-weight:bold; font-size:16px;">Заказ #${o.id} <span style="font-weight:normal; font-size:12px; color:#888;">${date}</span></div>
                             <div style="margin-top:5px;"><b>Клиент:</b> ${o.user_data?.name} (<a href="https://t.me/${o.user_data?.username}" target="_blank">@${o.user_data?.username}</a>)</div>
                             <div><b>Тел:</b> ${o.user_data?.phone}</div>
@@ -482,4 +438,3 @@ openAdminPanel();
     </script>
 </body>
 </html>
-
