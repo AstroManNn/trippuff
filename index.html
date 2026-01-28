@@ -1,769 +1,590 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#666666">
-<title>TripPuff</title>
-<style>
-:root {
---bg-color: #e0e0e0;
---card-bg: #f5f5f5;
---text-color: #333;
---primary-color: #666;
---secondary-color: #999;
---border-color: #ccc;
---accent-color: #ff6b6b;
-}
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-}
-body {
-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-background-color: var(--bg-color);
-color: var(--text-color);
-line-height: 1.6;
-overscroll-behavior: none;
-padding-bottom: env(safe-area-inset-bottom);
-}
-.screen {
-display: none;
-min-height: 100vh;
-padding-bottom: 20px;
-opacity: 0;
-transition: opacity 0.3s ease;
-}
-.screen.active {
-display: block;
-opacity: 1;
-}
-.container {
-max-width: 600px;
-margin: 40px auto;
-padding: 20px;
-text-align: center;
-}
-.welcome-logo {
-margin-bottom: 30px;
-}
-.logo-icon {
-font-size: 64px;
-margin-bottom: 20px;
-}
-.welcome-text {
-color: var(--secondary-color);
-margin-bottom: 40px;
-font-size: 18px;
-line-height: 1.5;
-}
-.form-group {
-margin-bottom: 20px;
-text-align: left;
-}
-.form-group label {
-display: block;
-margin-bottom: 8px;
-font-weight: 500;
-font-size: 16px;
-}
-.form-group input {
-width: 100%;
-padding: 14px;
-border: 2px solid var(--border-color);
-border-radius: 8px;
-font-size: 16px;
-transition: border-color 0.3s;
-}
-.form-group input:focus {
-outline: none;
-border-color: var(--primary-color);
-}
-.btn-primary {
-width: 100%;
-padding: 16px;
-background: linear-gradient(135deg, var(--primary-color), #444);
-color: white;
-border: none;
-border-radius: 8px;
-font-size: 18px;
-font-weight: 600;
-cursor: pointer;
-transition: transform 0.2s, box-shadow 0.2s;
-margin-top: 10px;
-}
-.btn-primary:hover {
-transform: translateY(-2px);
-box-shadow: 0 4px 12px rgba(102, 102, 102, 0.3);
-}
-.btn-primary:disabled {
-opacity: 0.6;
-cursor: not-allowed;
-}
-header {
-display: flex;
-justify-content: space-between;
-align-items: center;
-padding: 16px 20px;
-background-color: var(--card-bg);
-border-bottom: 1px solid var(--border-color);
-position: sticky;
-top: 0;
-z-index: 100;
-}
-.logo {
-font-size: 24px;
-font-weight: 700;
-background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-}
-.help-icon {
-width: 36px;
-height: 36px;
-background-color: var(--primary-color);
-color: white;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-font-weight: 700;
-font-size: 20px;
-cursor: pointer;
-transition: transform 0.2s;
-}
-.help-icon:hover {
-transform: scale(1.1);
-}
-nav {
-display: flex;
-background-color: var(--card-bg);
-border-bottom: 1px solid var(--border-color);
-}
-.tab-btn {
-flex: 1;
-padding: 16px;
-background: none;
-border: none;
-font-size: 16px;
-font-weight: 600;
-cursor: pointer;
-color: var(--secondary-color);
-transition: all 0.3s;
-position: relative;
-}
-.tab-btn.active {
-color: var(--primary-color);
-}
-.tab-btn.active::after {
-content: '';
-position: absolute;
-bottom: 0;
-left: 0;
-width: 100%;
-height: 3px;
-background-color: var(--primary-color);
-}
-.tab-content {
-display: none;
-padding: 20px;
-opacity: 0;
-transition: opacity 0.3s ease;
-}
-.tab-content.active {
-display: block;
-opacity: 1;
-}
-.bonus-card {
-background: linear-gradient(135deg, var(--card-bg), #e8e8e8);
-border-radius: 16px;
-padding: 30px;
-text-align: center;
-box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-}
-.card-header {
-margin-bottom: 25px;
-}
-.card-header h2 {
-font-size: 24px;
-color: var(--primary-color);
-}
-.qr-container {
-background-color: white;
-border-radius: 12px;
-padding: 25px;
-margin-bottom: 25px;
-box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-#qr-code {
-width: 220px;
-height: 220px;
-margin: 0 auto;
-display: flex;
-align-items: center;
-justify-content: center;
-background-color: white;
-border-radius: 8px;
-}
-#qr-code canvas {
-max-width: 100%;
-max-height: 100%;
-}
-.qr-info {
-margin-top: 15px;
-color: var(--secondary-color);
-font-size: 14px;
-}
-.user-info {
-margin-bottom: 25px;
-}
-.user-info h3 {
-margin-bottom: 8px;
-font-size: 22px;
-color: var(--primary-color);
-}
-.user-info p {
-color: var(--secondary-color);
-font-size: 16px;
-margin-bottom: 5px;
-}
-.referral-code {
-background-color: rgba(102, 102, 102, 0.1);
-padding: 8px 12px;
-border-radius: 6px;
-font-family: 'Courier New', monospace;
-font-size: 14px;
-margin-top: 5px;
-}
-.points {
-margin-top: 20px;
-padding: 20px;
-background: linear-gradient(135deg, white, #f8f8f8);
-border-radius: 12px;
-box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-.points-label {
-font-weight: 600;
-font-size: 18px;
-color: var(--secondary-color);
-display: block;
-margin-bottom: 10px;
-}
-.points-value {
-font-weight: 700;
-font-size: 36px;
-color: var(--accent-color);
-display: block;
-}
-.search-bar {
-margin-bottom: 25px;
-position: fixed;
-top: 105px;
-left: 50%;
-transform: translateX(-50%);
-width: calc(100% - 40px);
-max-width: 600px;
-background-color: var(--bg-color);
-padding: 10px 0;
-z-index: 90;
-transition: transform 0.3s ease, opacity 0.3s ease;
-}
-.search-bar.hidden {
-transform: translate(-50%, -100%);
-opacity: 0;
-}
-.search-bar input {
-width: 100%;
-padding: 14px 16px;
-border: 2px solid var(--border-color);
-border-radius: 8px;
-font-size: 16px;
-background-color: white;
-transition: border-color 0.3s;
-}
-.search-bar input:focus {
-outline: none;
-border-color: var(--primary-color);
-}
-.products-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-gap: 20px;
-}
-.product-card {
-background-color: white;
-border-radius: 12px;
-padding: 20px;
-text-align: center;
-box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-transition: transform 0.3s ease, box-shadow 0.3s ease;
-cursor: pointer;
-}
-.product-card:hover {
-transform: translateY(-8px);
-box-shadow: 0 12px 24px rgba(0,0,0,0.18);
-}
-.product-image {
-width: 100%;
-height: 160px;
-object-fit: cover;
-border-radius: 8px;
-margin-bottom: 15px;
-background-color: var(--card-bg);
-display: flex;
-align-items: center;
-justify-content: center;
-color: var(--secondary-color);
-font-size: 14px;
-}
-.product-name {
-font-weight: 600;
-margin-bottom: 10px;
-font-size: 16px;
-color: var(--primary-color);
-min-height: 40px;
-}
-.product-price {
-color: var(--accent-color);
-font-weight: 700;
-font-size: 20px;
-margin-bottom: 8px;
-}
-.product-description {
-color: var(--secondary-color);
-font-size: 14px;
-line-height: 1.4;
-min-height: 40px;
-}
-.modal {
-display: none;
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background-color: rgba(0,0,0,0.5);
-z-index: 1000;
-overflow-y: auto;
-transition: opacity 0.3s ease;
-}
-.modal.active {
-display: block;
-}
-.modal-content {
-background-color: white;
-margin: 60px auto 40px;
-padding: 30px;
-border-radius: 16px;
-max-width: 600px;
-box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-}
-.close-btn {
-float: right;
-font-size: 32px;
-font-weight: bold;
-cursor: pointer;
-color: var(--secondary-color);
-transition: color 0.2s;
-}
-.close-btn:hover {
-color: var(--primary-color);
-}
-#faq-content {
-line-height: 1.8;
-}
-#faq-content h3 {
-color: var(--primary-color);
-margin-bottom: 10px;
-font-size: 18px;
-}
-#faq-content p {
-color: var(--text-color);
-margin-bottom: 20px;
-font-size: 15px;
-}
-.no-products {
-text-align: center;
-color: var(--secondary-color);
-padding: 40px;
-font-size: 18px;
-}
-.loading {
-text-align: center;
-padding: 40px;
-color: var(--secondary-color);
-}
-.error-message {
-background-color: #ffebee;
-color: #c62828;
-padding: 15px;
-border-radius: 8px;
-margin: 15px 0;
-text-align: center;
-}
-@media (max-width: 480px) {
-.container {
-margin: 20px;
-padding: 15px;
-}
-.bonus-card {
-padding: 20px 15px;
-}
-#qr-code {
-width: 180px;
-height: 180px;
-}
-.points-value {
-font-size: 28px;
-}
-.product-card {
-padding: 15px;
-}
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#666666">
+    <title>TripPuff</title>
+    <style>
+        :root {
+            --bg-color: #e0e0e0;
+            --card-bg: #f5f5f5;
+            --text-color: #333;
+            --primary-color: #666;
+            --secondary-color: #999;
+            --border-color: #ccc;
+            --accent-color: #ff6b6b;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overscroll-behavior: none;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .screen { display: none; min-height: 100vh; padding-bottom: 80px; opacity: 0; transition: opacity 0.3s ease; }
+        .screen.active { display: block; opacity: 1; }
+        .container { max-width: 600px; margin: 40px auto; padding: 20px; text-align: center; }
+        .welcome-logo { margin-bottom: 30px; }
+        .logo-icon { font-size: 64px; margin-bottom: 20px; }
+        .welcome-text { color: var(--secondary-color); margin-bottom: 40px; font-size: 18px; line-height: 1.5; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 16px; }
+        .form-group input, .form-group textarea {
+            width: 100%; padding: 14px; border: 2px solid var(--border-color);
+            border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
+            background: white; font-family: inherit;
+        }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); }
+        .btn-primary {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, var(--primary-color), #444);
+            color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: 600;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 10px;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 102, 102, 0.3); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .btn-danger { background: linear-gradient(135deg, #ff6b6b, #d32f2f); }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center; padding: 16px 20px;
+            background-color: var(--card-bg); border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo {
+            font-size: 24px; font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .help-icon {
+            width: 36px; height: 36px; background-color: var(--primary-color); color: white;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 20px; cursor: pointer; transition: transform 0.2s;
+        }
+        nav { display: flex; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
+        .tab-btn {
+            flex: 1; padding: 16px; background: none; border: none; font-size: 16px;
+            font-weight: 600; cursor: pointer; color: var(--secondary-color);
+            transition: all 0.3s; position: relative;
+        }
+        .tab-btn.active { color: var(--primary-color); }
+        .tab-btn.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 3px;
+            background-color: var(--primary-color);
+        }
+        .tab-content { display: none; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
+        .tab-content.active { display: block; opacity: 1; }
+        
+        /* Bonus Card */
+        .bonus-card {
+            background: linear-gradient(135deg, var(--card-bg), #e8e8e8); border-radius: 16px;
+            padding: 30px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .qr-container {
+            background-color: white; border-radius: 12px; padding: 25px; margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        #qr-code {
+            width: 220px; height: 220px; margin: 0 auto; display: flex;
+            align-items: center; justify-content: center; background-color: white; border-radius: 8px;
+        }
+        #qr-code canvas { max-width: 100%; max-height: 100%; }
+        .user-info h3 { margin-bottom: 8px; font-size: 22px; color: var(--primary-color); }
+        .points {
+            margin-top: 20px; padding: 20px; background: linear-gradient(135deg, white, #f8f8f8);
+            border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .points-value { font-weight: 700; font-size: 36px; color: var(--accent-color); display: block; }
+        
+        /* Catalog */
+        .search-bar { margin-bottom: 20px; width: 100%; }
+        .search-bar input {
+            width: 100%; padding: 14px 16px; border: 2px solid var(--border-color);
+            border-radius: 8px; font-size: 16px; background-color: white; transition: border-color 0.3s;
+        }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .product-card {
+            background-color: white; border-radius: 12px; padding: 20px; text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); position: relative;
+            display: flex; flex-direction: column;
+        }
+        .product-image {
+            width: 100%; height: 160px; object-fit: cover; border-radius: 8px;
+            margin-bottom: 15px; background-color: var(--card-bg);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .product-name { font-weight: 600; margin-bottom: 10px; color: var(--primary-color); }
+        .product-price { color: var(--accent-color); font-weight: 700; font-size: 20px; margin-bottom: 8px; }
+        .product-description { color: var(--secondary-color); font-size: 14px; margin-bottom: 15px; flex-grow: 1; }
+        
+        .add-to-cart-btn {
+            background-color: var(--primary-color); color: white; border: none;
+            padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;
+            transition: background 0.2s; width: 100%;
+        }
+        .add-to-cart-btn:hover { background-color: #444; }
+
+        /* Floating Cart */
+        .cart-fab {
+            position: fixed; bottom: 30px; right: 20px;
+            width: 60px; height: 60px;
+            background: linear-gradient(135deg, var(--accent-color), #ff4d4d);
+            border-radius: 50%; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 24px; cursor: pointer; z-index: 90;
+            transition: transform 0.2s;
+        }
+        .cart-fab:hover { transform: scale(1.1); }
+        .cart-badge {
+            position: absolute; top: -5px; right: -5px;
+            background-color: #333; color: white; font-size: 12px;
+            width: 24px; height: 24px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid white;
+        }
+
+        /* Modals */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+        .modal.active { display: flex; align-items: center; justify-content: center; }
+        .modal-content {
+            background-color: white; padding: 25px; border-radius: 16px;
+            width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative;
+        }
+        .close-btn {
+            position: absolute; top: 15px; right: 20px; font-size: 28px;
+            cursor: pointer; color: var(--secondary-color);
+        }
+        
+        .cart-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 0; border-bottom: 1px solid var(--border-color);
+        }
+        .cart-item-info { flex: 1; }
+        .cart-item-title { font-weight: 600; font-size: 16px; color: var(--text-color); }
+        .cart-item-price { color: var(--accent-color); font-weight: 700; }
+        .cart-controls { display: flex; align-items: center; gap: 10px; }
+        .qty-btn {
+            width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-color);
+            background: white; cursor: pointer; font-size: 16px; color: var(--primary-color);
+        }
+        .cart-total {
+            margin-top: 20px; font-size: 20px; font-weight: 700;
+            display: flex; justify-content: space-between; border-top: 2px solid var(--text-color);
+            padding-top: 15px;
+        }
+        .loading { text-align: center; padding: 20px; color: var(--secondary-color); }
+    </style>
 </head>
 <body>
-<!-- Стартовый экран регистрации -->
-<div id="registration-screen" class="screen active">
-<div class="container">
-<div class="welcome-logo">
-<div class="logo-icon">✈️💨</div>
-<h1>TripPuff</h1>
-</div>
-<p class="welcome-text">Получайте бонусы за покупки!</p>
-<div class="form-group">
-<label for="name">Имя</label>
-<input type="text" id="name" placeholder="Введите ваше имя" required>
-</div>
-<div class="form-group">
-<label for="phone">Номер телефона</label>
-<input type="tel" id="phone" placeholder="+7 (___) ___-__-__" required>
-</div>
-<button class="btn-primary" onclick="registerUser()">Продолжить</button>
-<p style="margin-top: 20px; font-size: 14px; color: var(--secondary-color);">
-Нажимая "Продолжить", вы соглашаетесь с обработкой персональных данных
-</p>
-</div>
-</div>
-<!-- Основной экран приложения -->
-<div id="main-screen" class="screen">
-<!-- Заголовок с иконкой помощи -->
-<header>
-<div class="logo">TripPuff</div>
-<div class="help-icon" onclick="openFAQ()">?</div>
-</header>
-<!-- Навигация -->
-<nav>
-<button class="tab-btn active" onclick="switchTab('bonus')">Бонусная карта</button>
-<button class="tab-btn" onclick="switchTab('catalog')">Каталог</button>
-</nav>
-<!-- Вкладка Бонусная карта -->
-<div id="bonus-tab" class="tab-content active">
-<div class="bonus-card">
-<div class="card-header">
-<h2>Ваша бонусная карта</h2>
-</div>
-<div class="qr-container">
-<div id="qr-code"></div>
-<div class="qr-info">
-<p>Покажите этот код при покупке</p>
-</div>
-</div>
-<div class="user-info">
-<h3 id="user-name"></h3>
-<p id="user-phone"></p>
-<p class="referral-code">Код: <span id="referral-code"></span></p>
-</div>
-<div class="points">
-<span class="points-label">Баллов:</span>
-<span class="points-value" id="points-count">0</span>
-</div>
-</div>
-</div>
-<!-- Вкладка Каталог -->
-<div id="catalog-tab" class="tab-content">
-<div class="search-bar">
-<input type="text" id="search-input" placeholder="Поиск товаров..." oninput="filterProducts()">
-</div>
-<div id="products-container" class="products-grid">
-<div class="loading">Загрузка товаров...</div>
-</div>
-</div>
-</div>
-<!-- Модальное окно FAQ -->
-<div id="faq-modal" class="modal">
-<div class="modal-content">
-<span class="close-btn" onclick="closeFAQ()">&times;</span>
-<h2>Часто задаваемые вопросы</h2>
-<div id="faq-content">
-<div class="loading">Загрузка...</div>
-</div>
-</div>
-</div>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-<script>
-// ⚠️ ЗАМЕНИ ЭТОТ АДРЕС НА СВОЙ ПОСЛЕ РАЗВЁРТЫВАНИЯ БЭКЕНДА НА REPLIT!
-const API_URL = 'https://ytiiiipuff-production.up.railway.app'; // ← ЗАМЕНИ НА СВОЙ АДРЕС!
-let userData = null;
-let products = [];
-let qrCodeInstance = null;
-let lastScrollPosition = 0;
-let scrollTimeout = null;
-async function initApp() {
-try {
-const initData = Telegram.WebApp.initDataUnsafe;
-const userId = initData?.user?.id;
-if (!userId) {
-alert('Откройте приложение через Telegram!');
-return;
-}
-Telegram.WebApp.expand();
-Telegram.WebApp.setHeaderColor('#e0e0e0');
-Telegram.WebApp.setBackgroundColor('#e0e0e0');
-userData = await checkUserRegistration(userId);
-if (userData) {
-showMainScreen();
-loadBonusTab();
-} else {
-showRegistrationScreen();
-}
-} catch (error) {
-console.error('Init error:', error);
-alert('Ошибка инициализации приложения');
-}
-}
-async function checkUserRegistration(userId) {
-try {
-const response = await fetch(`${API_URL}/api/user/${userId}`);
-if (response.ok) {
-const data = await response.json();
-return data;
-}
-} catch (error) {
-console.error('Error checking registration:', error);
-}
-return null;
-}
-function showRegistrationScreen() {
-document.getElementById('main-screen').classList.remove('active');
-setTimeout(() => {
-document.getElementById('registration-screen').classList.add('active');
-}, 300);
-}
-function showMainScreen() {
-document.getElementById('registration-screen').classList.remove('active');
-setTimeout(() => {
-document.getElementById('main-screen').classList.add('active');
-}, 300);
-}
-async function registerUser() {
-const nameInput = document.getElementById('name');
-const phoneInput = document.getElementById('phone');
-const name = nameInput.value.trim();
-const phone = phoneInput.value.trim();
-if (!name) {
-alert('Пожалуйста, введите имя');
-nameInput.focus();
-return;
-}
-if (!phone) {
-alert('Пожалуйста, введите номер телефона');
-phoneInput.focus();
-return;
-}
-const button = event.target;
-button.disabled = true;
-button.textContent = 'Регистрация...';
-const initData = Telegram.WebApp.initDataUnsafe;
-const userId = initData?.user?.id;
-if (!userId) {
-alert('Ошибка: не удалось получить данные пользователя');
-button.disabled = false;
-button.textContent = 'Продолжить';
-return;
-}
-try {
-const response = await fetch(`${API_URL}/api/register`, {
-method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ userId, name, phone })
-});
-const data = await response.json();
-if (data.success) {
-userData = data.user;
-showMainScreen();
-loadBonusTab();
-alert('Добро пожаловать в TripPuff! Ваша бонусная карта готова.');
-} else {
-alert(data.message || 'Ошибка регистрации');
-}
-} catch (error) {
-console.error('Registration error:', error);
-alert('Произошла ошибка при регистрации. Проверьте подключение к интернету.');
-} finally {
-button.disabled = false;
-button.textContent = 'Продолжить';
-}
-}
-function switchTab(tabName) {
-document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-document.querySelectorAll('.tab-content').forEach(tab => {
-tab.classList.remove('active');
-setTimeout(() => {
-if (tab.id === `${tabName}-tab`) {
-tab.classList.add('active');
-}
-}, 300);
-});
-event.target.classList.add('active');
-if (tabName === 'bonus') {
-loadBonusTab();
-} else if (tabName === 'catalog') {
-loadCatalogTab();
-}
-}
-async function loadBonusTab() {
-if (!userData) return;
-document.getElementById('user-name').textContent = userData.name;
-document.getElementById('user-phone').textContent = formatPhone(userData.phone);
-document.getElementById('points-count').textContent = userData.points || 0;
-document.getElementById('referral-code').textContent = userData.referral_code;
-generateQRCode(userData.referral_code);
-}
-function formatPhone(phone) {
-if (phone.startsWith('+7') && phone.length >= 12) {
-return `+7 (${phone.substring(2,5)}) ${phone.substring(5,8)}-${phone.substring(8,10)}-${phone.substring(10,12)}`;
-}
-return phone;
-}
-function generateQRCode(code) {
-const qrContainer = document.getElementById('qr-code');
-qrContainer.innerHTML = '';
-if (qrCodeInstance) {
-qrCodeInstance.clear();
-}
-const qrData = `tripPuff://user/${code}`;
-qrCodeInstance = new QRCode(qrContainer, {
-text: qrData,
-width: 200,
-height: 200,
-correctLevel: QRCode.CorrectLevel.H
-});
-}
-async function loadCatalogTab() {
-const container = document.getElementById('products-container');
-container.innerHTML = '<div class="loading">Загрузка товаров...</div>';
-try {
-const response = await fetch(`${API_URL}/api/products`);
-if (!response.ok) {
-throw new Error('Ошибка загрузки товаров');
-}
-products = await response.json();
-displayProducts(products);
-setupScrollListener();
-} catch (error) {
-console.error('Error loading products:', error);
-container.innerHTML = '<p class="error-message">Ошибка загрузки товаров. Проверьте подключение к интернету.</p>';
-}
-}
-function displayProducts(productsList) {
-const container = document.getElementById('products-container');
-container.innerHTML = '';
-if (productsList.length === 0) {
-container.innerHTML = '<p class="no-products">Товары временно отсутствуют</p>';
-return;
-}
-productsList.forEach(product => {
-const card = document.createElement('div');
-card.className = 'product-card';
-card.innerHTML = `
-${product.image_url ?
-`<img src="${escapeHtml(product.image_url)}" alt="${escapeHtml(product.name)}" class="product-image">` :
-`<div class="product-image">Изображение отсутствует</div>`
-}
-<h3 class="product-name">${escapeHtml(product.name)}</h3>
-<p class="product-price">${parseFloat(product.price).toFixed(2)} ₽</p>
-<p class="product-description">${escapeHtml(product.description || 'Описание отсутствует')}</p>
-`;
-container.appendChild(card);
-});
-}
-function filterProducts() {
-const searchTerm = document.getElementById('search-input').value.toLowerCase();
-const filtered = products.filter(p =>
-p.name.toLowerCase().includes(searchTerm) ||
-(p.description && p.description.toLowerCase().includes(searchTerm))
-);
-displayProducts(filtered);
-}
-function setupScrollListener() {
-const searchBar = document.querySelector('.search-bar');
-let isHidden = false;
-let lastScrollY = 0;
-window.addEventListener('scroll', () => {
-const currentScrollY = window.scrollY;
-if (scrollTimeout) {
-clearTimeout(scrollTimeout);
-}
-if (currentScrollY > 150 && !isHidden && currentScrollY > lastScrollY) {
-searchBar.classList.add('hidden');
-isHidden = true;
-} else if ((currentScrollY <= 150 || currentScrollY < lastScrollY) && isHidden) {
-searchBar.classList.remove('hidden');
-isHidden = false;
-}
-lastScrollY = currentScrollY;
-scrollTimeout = setTimeout(() => {
-if (currentScrollY < lastScrollY && isHidden) {
-searchBar.classList.remove('hidden');
-isHidden = false;
-}
-}, 100);
-}, { passive: true });
-}
-async function openFAQ() {
-document.getElementById('faq-modal').classList.add('active');
-const faqContent = document.getElementById('faq-content');
-faqContent.innerHTML = '<div class="loading">Загрузка...</div>';
-try {
-const response = await fetch(`${API_URL}/api/faq`);
-if (!response.ok) {
-throw new Error('Ошибка загрузки FAQ');
-}
-const data = await response.json();
-if (data.length === 0) {
-faqContent.innerHTML = '<p>FAQ временно недоступен</p>';
-return;
-}
-faqContent.innerHTML = data.map(item => `
-<div class="faq-item">
-<h3>${escapeHtml(item.question)}</h3>
-<p>${escapeHtml(item.answer)}</p>
-</div>
-`).join('');
-} catch (error) {
-console.error('Error loading FAQ:', error);
-faqContent.innerHTML = '<p class="error-message">Ошибка загрузки FAQ. Проверьте подключение к интернету.</p>';
-}
-}
-function closeFAQ() {
-document.getElementById('faq-modal').classList.remove('active');
-}
-function escapeHtml(text) {
-const div = document.createElement('div');
-div.textContent = text;
-return div.innerHTML;
-}
-document.addEventListener('DOMContentLoaded', initApp);
-</script>
+    <!-- Регистрация -->
+    <div id="registration-screen" class="screen active">
+        <div class="container">
+            <div class="welcome-logo">
+                <div class="logo-icon">✈️💨</div>
+                <h1>TripPuff</h1>
+            </div>
+            <p class="welcome-text">Получайте бонусы за покупки!</p>
+            <div class="form-group">
+                <label for="name">Имя</label>
+                <input type="text" id="name" placeholder="Введите ваше имя" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Номер телефона</label>
+                <input type="tel" id="phone" placeholder="+7 (___) ___-__-__" required>
+            </div>
+            <button class="btn-primary" onclick="registerUser()">Продолжить</button>
+        </div>
+    </div>
+
+    <!-- Основной экран -->
+    <div id="main-screen" class="screen">
+        <header>
+            <div class="logo">TripPuff</div>
+            <div class="help-icon" onclick="openFAQ()">?</div>
+        </header>
+        <nav>
+            <button class="tab-btn active" onclick="switchTab('bonus')">Бонусная карта</button>
+            <button class="tab-btn" onclick="switchTab('catalog')">Каталог</button>
+        </nav>
+
+        <!-- Бонусная карта -->
+        <div id="bonus-tab" class="tab-content active">
+            <div class="bonus-card">
+                <h2>Ваша бонусная карта</h2>
+                <div class="qr-container">
+                    <div id="qr-code"></div>
+                </div>
+                <div class="user-info">
+                    <h3 id="user-name"></h3>
+                    <p id="user-phone"></p>
+                    <p style="color:var(--secondary-color); font-family: monospace;">Код: <span id="referral-code"></span></p>
+                </div>
+                <div class="points">
+                    <span style="color:var(--secondary-color)">Баллов:</span>
+                    <span class="points-value" id="points-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Каталог -->
+        <div id="catalog-tab" class="tab-content">
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Поиск товаров..." oninput="filterProducts()">
+            </div>
+            <div id="products-container" class="products-grid">
+                <div class="loading">Загрузка товаров...</div>
+            </div>
+        </div>
+        
+        <!-- Кнопка корзины -->
+        <div class="cart-fab" onclick="openCart()">
+            🛒
+            <div id="cart-badge" class="cart-badge" style="display:none">0</div>
+        </div>
+    </div>
+
+    <!-- Модальное окно FAQ -->
+    <div id="faq-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('faq-modal')">&times;</span>
+            <h2>Часто задаваемые вопросы</h2>
+            <div id="faq-content"></div>
+        </div>
+    </div>
+
+    <!-- Модальное окно Корзины -->
+    <div id="cart-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('cart-modal')">&times;</span>
+            <h2>Корзина</h2>
+            <div id="cart-items-container"></div>
+            <div class="cart-total">
+                <span>Итого:</span>
+                <span id="cart-total-price">0 ₽</span>
+            </div>
+            <button class="btn-primary" onclick="startCheckout()" style="margin-top:20px;">Оформить заказ</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно Предупреждения (18+) -->
+    <div id="age-warning-modal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <div style="font-size: 40px; margin-bottom: 10px;">🔞</div>
+            <h2>Внимание!</h2>
+            <p style="margin: 20px 0; color: var(--text-color);">
+                Учитывайте, что если ваш возраст меньше 18 лет - курьер в праве отказать вам в выдаче товара и возврате денежных средств.
+            </p>
+            <button class="btn-primary" onclick="showAddressForm()">Всё понятно, мне есть 18</button>
+            <button class="btn-primary btn-danger" onclick="closeModal('age-warning-modal')" style="margin-top: 10px; background: #999;">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно Адреса -->
+    <div id="address-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('address-modal')">&times;</span>
+            <h2>Оформление</h2>
+            <div class="form-group">
+                <label>Адрес доставки</label>
+                <textarea id="delivery-address" rows="3" placeholder="Улица, дом, квартира, подъезд..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Комментарий к заказу</label>
+                <textarea id="order-comment" rows="2" placeholder="Код домофона, сдача с..."></textarea>
+            </div>
+            <button class="btn-primary" onclick="submitOrder()">Подтвердить заказ</button>
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        // ⚠️ ЗАМЕНИ НА СВОЙ АДРЕС С RAILWAY!
+        const API_URL = 'https://ytiiiipuff-production.up.railway.app'; 
+        
+        let userData = null;
+        let products = [];
+        let cart = [];
+
+        async function initApp() {
+            try {
+                const initData = Telegram.WebApp.initDataUnsafe;
+                const userId = initData?.user?.id;
+                
+                // const userId = 123456789; // Тест в браузере
+
+                if (!userId) { alert('Откройте в Telegram!'); return; }
+
+                Telegram.WebApp.expand();
+                Telegram.WebApp.setHeaderColor('#e0e0e0');
+                
+                userData = await checkUserRegistration(userId);
+                
+                if (userData) {
+                    showMainScreen();
+                    loadBonusTab();
+                    updateCartBadge();
+                } else {
+                    showRegistrationScreen();
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        async function checkUserRegistration(userId) {
+            try {
+                const res = await fetch(`${API_URL}/api/user/${userId}`);
+                if (res.ok) return await res.json();
+            } catch (e) {}
+            return null;
+        }
+
+        function showRegistrationScreen() {
+            document.getElementById('registration-screen').classList.add('active');
+        }
+
+        function showMainScreen() {
+            document.getElementById('registration-screen').classList.remove('active');
+            document.getElementById('main-screen').classList.add('active');
+        }
+
+        async function registerUser() {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const tgUser = Telegram.WebApp.initDataUnsafe?.user;
+            
+            if (!name || !phone) return alert('Заполните поля');
+
+            const res = await fetch(`${API_URL}/api/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    userId: tgUser.id, 
+                    name, 
+                    phone,
+                    username: tgUser.username || '' // Отправляем юзернейм
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                userData = data.user;
+                showMainScreen();
+                loadBonusTab();
+            } else {
+                alert(data.message);
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`${tab}-tab`).classList.add('active');
+            event.target.classList.add('active');
+            if (tab === 'catalog') loadCatalog();
+        }
+
+        function loadBonusTab() {
+            if (!userData) return;
+            document.getElementById('user-name').textContent = userData.name;
+            document.getElementById('user-phone').textContent = userData.phone;
+            document.getElementById('points-count').textContent = userData.points || 0;
+            document.getElementById('referral-code').textContent = userData.referral_code;
+            
+            const qrContainer = document.getElementById('qr-code');
+            qrContainer.innerHTML = '';
+            new QRCode(qrContainer, { text: `user:${userData.referral_code}`, width: 200, height: 200 });
+        }
+
+        async function loadCatalog() {
+            const container = document.getElementById('products-container');
+            if (products.length > 0) return;
+            
+            try {
+                const res = await fetch(`${API_URL}/api/products`);
+                products = await res.json();
+                displayProducts(products);
+            } catch (e) { container.innerHTML = '<p>Ошибка загрузки</p>'; }
+        }
+
+        function displayProducts(list) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+            list.forEach(p => {
+                const el = document.createElement('div');
+                el.className = 'product-card';
+                el.innerHTML = `
+                    <div class="product-image">
+                        ${p.image_url ? `<img src="${p.image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;">` : 'Фото'}
+                    </div>
+                    <div class="product-name">${p.name}</div>
+                    <div class="product-price">${p.price} ₽</div>
+                    <div class="product-description">${p.description}</div>
+                    <button class="add-to-cart-btn" onclick="addToCart(${p.id})">В корзину +</button>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function filterProducts() {
+            const term = document.getElementById('search-input').value.toLowerCase();
+            const filtered = products.filter(p => p.name.toLowerCase().includes(term));
+            displayProducts(filtered);
+        }
+
+        // --- КОРЗИНА ---
+        async function updateCartBadge() {
+            if (!userData) return;
+            try {
+                const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`);
+                cart = await res.json();
+                
+                const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+                const badge = document.getElementById('cart-badge');
+                if (count > 0) {
+                    badge.style.display = 'flex';
+                    badge.textContent = count;
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        async function addToCart(productId) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            try {
+                await fetch(`${API_URL}/api/cart/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userData.telegram_id, productId })
+                });
+                updateCartBadge();
+            } catch (e) { alert('Ошибка добавления'); }
+        }
+
+        async function removeFromCart(productId, removeAll = false) {
+             try {
+                await fetch(`${API_URL}/api/cart/remove`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userData.telegram_id, productId, removeAll })
+                });
+                await updateCartBadge();
+                openCart();
+            } catch (e) { alert('Ошибка удаления'); }
+        }
+
+        async function openCart() {
+            await updateCartBadge();
+            const modal = document.getElementById('cart-modal');
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total-price');
+            
+            container.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:20px;">Корзина пуста</p>';
+                totalEl.textContent = '0 ₽';
+            } else {
+                cart.forEach(item => {
+                    const sum = item.price * item.quantity;
+                    total += sum;
+                    const el = document.createElement('div');
+                    el.className = 'cart-item';
+                    el.innerHTML = `
+                        <div class="cart-item-info">
+                            <div class="cart-item-title">${item.name}</div>
+                            <div class="cart-item-price">${item.price} ₽ x ${item.quantity} = ${sum} ₽</div>
+                        </div>
+                        <div class="cart-controls">
+                            <button class="qty-btn" onclick="removeFromCart(${item.product_id})">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="qty-btn" onclick="addToCart(${item.product_id}); setTimeout(openCart, 100);">+</button>
+                        </div>
+                    `;
+                    container.appendChild(el);
+                });
+                totalEl.textContent = total.toFixed(2) + ' ₽';
+            }
+            modal.classList.add('active');
+        }
+
+        // --- ЗАКАЗ ---
+        function startCheckout() {
+            if (cart.length === 0) return alert('Корзина пуста');
+            closeModal('cart-modal');
+            document.getElementById('age-warning-modal').classList.add('active');
+        }
+
+        function showAddressForm() {
+            closeModal('age-warning-modal');
+            document.getElementById('address-modal').classList.add('active');
+        }
+
+        async function submitOrder() {
+            const address = document.getElementById('delivery-address').value;
+            const comment = document.getElementById('order-comment').value;
+
+            if (!address) return alert('Пожалуйста, укажите адрес доставки');
+
+            const btn = event.target;
+            btn.textContent = 'Отправка...';
+            btn.disabled = true;
+
+            try {
+                // Отправляем запрос, бэкенд сам подтянет имя и телефон из базы
+                const res = await fetch(`${API_URL}/api/order`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: userData.telegram_id,
+                        address,
+                        comment
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('Заказ успешно оформлен!');
+                    closeModal('address-modal');
+                    document.getElementById('delivery-address').value = '';
+                    document.getElementById('order-comment').value = '';
+                    updateCartBadge();
+                } else {
+                    alert('Ошибка: ' + data.message);
+                }
+            } catch (e) {
+                alert('Ошибка соединения');
+            } finally {
+                btn.textContent = 'Подтвердить заказ';
+                btn.disabled = false;
+            }
+        }
+
+        // --- УТИЛИТЫ ---
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        async function openFAQ() {
+            const modal = document.getElementById('faq-modal');
+            const content = document.getElementById('faq-content');
+            modal.classList.add('active');
+            try {
+                const res = await fetch(`${API_URL}/api/faq`);
+                const data = await res.json();
+                content.innerHTML = data.map(i => `
+                    <div style="margin-bottom:15px">
+                        <h3 style="color:var(--primary-color)">${i.question}</h3>
+                        <p>${i.answer}</p>
+                    </div>
+                `).join('');
+            } catch (e) { content.innerHTML = 'Ошибка загрузки'; }
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
 </body>
 </html>
-
-
-
-
-
-
-
