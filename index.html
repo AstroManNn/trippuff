@@ -386,7 +386,22 @@
         async function fetchCart() { if (!userData) return; try { const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`); cart = await res.json(); updateCartBadge(); if (document.getElementById('catalog-tab').classList.contains('active')) filterProducts(); } catch (e) {} }
         async function loadCatalog() { const container = document.getElementById('products-container'); if (cart.length === 0) await fetchCart(); if (products.length === 0) { try { const res = await fetch(`${API_URL}/api/products`); products = await res.json(); displayProducts(products); } catch (e) { container.innerHTML = '<p>Ошибка</p>'; } } else displayProducts(products); }
         function setCategory(cat) { currentCategory = cat; document.querySelectorAll('.cat-btn').forEach(btn => { btn.classList.remove('active'); if (btn.textContent === cat || (cat === 'all' && btn.textContent === 'Все')) btn.classList.add('active'); }); filterProducts(); }
-        function filterProducts() { const term = document.getElementById('search-input').value.toLowerCase(); const filtered = products.filter(p => { const matchesSearch = p.name.toLowerCase().includes(term); const matchesCategory = currentCategory === 'all' || p.category === currentCategory; return matchesSearch && matchesCategory; }); displayProducts(filtered); }
+        function filterProducts() { 
+            const term = document.getElementById('search-input').value.toLowerCase(); 
+            
+            const filtered = products.filter(p => { 
+                const matchesSearch = p.name.toLowerCase().includes(term); 
+                const matchesCategory = currentCategory === 'all' || p.category === currentCategory; 
+                
+                // 🔥 НОВАЯ ЛОГИКА:
+                // Показываем товар, если: (сток больше 0) ИЛИ (пользователь админ)
+                const isVisible = p.stock > 0 || (userData && userData.is_admin);
+
+                return matchesSearch && matchesCategory && isVisible; 
+            }); 
+            
+            displayProducts(filtered); 
+        }
         function displayProducts(list) { const container = document.getElementById('products-container'); container.innerHTML = ''; if (list.length === 0) { container.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Пусто</div>'; return; } list.forEach(p => { const cartItem = cart.find(c => c.product_id === p.id); const hasStock = p.stock > 0; let buttonHtml = ''; if (!hasStock) buttonHtml = `<div class="out-of-stock">Нет в наличии</div>`; else if (cartItem) { buttonHtml = `<div class="qty-control-catalog"><button onclick="changeQtyFromCatalog(${p.id}, -1)">-</button><div style="text-align:center"><div class="in-cart-text">В корзине</div><span>${cartItem.quantity}</span></div><button onclick="changeQtyFromCatalog(${p.id}, 1)">+</button></div>`; } else buttonHtml = `<button class="add-to-cart-btn" onclick="addToCart(${p.id})">В корзину +</button>`; const el = document.createElement('div'); el.className = 'product-card'; el.innerHTML = `<div class="product-image">${p.image_url ? `<img src="${p.image_url}">` : 'Фото'}</div><div class="product-name">${p.name}</div><div class="product-price">${p.price} ₽</div><div class="product-description">${p.description}</div>${buttonHtml}`; container.appendChild(el); }); }
         function updateCartBadge() { const count = cart.reduce((sum, item) => sum + item.quantity, 0); const badge = document.getElementById('cart-badge'); if (count > 0) { badge.style.display = 'flex'; badge.textContent = count; } else badge.style.display = 'none'; }
         async function addToCart(id) { Telegram.WebApp.HapticFeedback.impactOccurred('light'); try { await fetch(`${API_URL}/api/cart/add`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id }) }); await fetchCart(); } catch (e) {} }
@@ -622,28 +637,34 @@
         }
 
         async function deleteProduct(id) {
-            if(!confirm('Удалить товар?')) return;
-            
-            // Получаем кнопку, чтобы показать процесс
-            const btn = event.target; 
-            const originalText = btn.textContent;
-            btn.textContent = '⏳';
-            btn.disabled = true;
+            // Останавливаем всплытие события, чтобы клик не ушел куда-то еще
+            if (event) event.stopPropagation();
+
+            if(!confirm('Точно удалить этот товар?')) return;
 
             try {
-                // Проверяем, авторизован ли пользователь
-                if (!userData || !userData.telegram_id) {
-                    alert('Ошибка: Пользователь не найден. Перезагрузите приложение.');
-                    return;
-                }
-
+                // Отправляем запрос на удаление
                 const res = await fetch(`${API_URL}/api/admin/product/${id}`, { 
                     method: 'DELETE', 
                     headers: {
                         'Content-Type': 'application/json',
-                        'user-id': userData.telegram_id.toString() // Важно: передаем ID как строку
+                        'user-id': userData.telegram_id.toString() 
                     } 
                 });
+
+                if (res.ok) {
+                    // Если всё ок - просто перезагружаем список. 
+                    // Это самый надежный способ "разбагать" интерфейс.
+                    await loadAdminProducts(); 
+                } else {
+                    const data = await res.json();
+                    alert('Ошибка удаления: ' + (data.error || 'Неизвестно'));
+                }
+            } catch(e) { 
+                console.error(e);
+                alert('Ошибка сети. Проверьте соединение.');
+            }
+        }
 
                 // Пытаемся прочитать ответ сервера
                 let data = {};
@@ -939,4 +960,5 @@
     </script>
 </body>
 </html>
+
 
