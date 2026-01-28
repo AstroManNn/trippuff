@@ -623,8 +623,47 @@
 
         async function deleteProduct(id) {
             if(!confirm('Удалить товар?')) return;
-            await fetch(`${API_URL}/api/admin/product/${id}`, { method: 'DELETE', headers: {'user-id': userData.telegram_id} });
-            loadAdminProducts();
+            
+            // Получаем кнопку, чтобы показать процесс
+            const btn = event.target; 
+            const originalText = btn.textContent;
+            btn.textContent = '⏳';
+            btn.disabled = true;
+
+            try {
+                // Проверяем, авторизован ли пользователь
+                if (!userData || !userData.telegram_id) {
+                    alert('Ошибка: Пользователь не найден. Перезагрузите приложение.');
+                    return;
+                }
+
+                const res = await fetch(`${API_URL}/api/admin/product/${id}`, { 
+                    method: 'DELETE', 
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'user-id': userData.telegram_id.toString() // Важно: передаем ID как строку
+                    } 
+                });
+
+                // Пытаемся прочитать ответ сервера
+                let data = {};
+                try { data = await res.json(); } catch(e) {}
+
+                if (res.ok) {
+                    // Если успешно - обновляем список
+                    loadAdminProducts(); 
+                } else {
+                    // Если ошибка - показываем текст ошибки
+                    alert('Не удалось удалить: ' + (data.error || 'Ошибка сервера'));
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+            } catch(e) { 
+                console.error(e);
+                alert('Ошибка сети. Проверьте интернет.');
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
         }
 
         // ORDERS MANAGEMENT
@@ -900,3 +939,4 @@
     </script>
 </body>
 </html>
+
