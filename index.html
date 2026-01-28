@@ -1,4 +1,3 @@
-> ^:
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -70,7 +69,6 @@
         .logo { font-size: 28px; font-weight: 700; text-align: center; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .
 
-> ^:
 help-icon { width: 36px; height: 36px; background-color: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; cursor: pointer; justify-self: end; }
         nav { display: flex; background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); }
         .tab-btn { flex: 1; padding: 16px; background: none; border: none; font-size: 16px; font-weight: 600; cursor: pointer; color: var(--secondary-color); transition: all 0.3s; position: relative; }
@@ -102,7 +100,6 @@ help-icon { width: 36px; height: 36px; background-color: var(--primary-color); c
         .qty-control-catalog { display: flex; justify-content: space-between; align-items: center; background-color: var(--red-color); color: white; border-radius: 8px; padding: 5px; width: 100%; }
         .
 
-> ^:
 qty-control-catalog button { background: none; border: none; color: white; font-weight: bold; font-size: 18px; padding: 0 15px; cursor: pointer; }
         .qty-control-catalog span { font-weight: 600; }
         .in-cart-text { font-size: 12px; text-transform: uppercase; margin-bottom: 2px; }
@@ -140,7 +137,6 @@ qty-control-catalog button { background: none; border: none; color: white; font-
         
         .
 
-> ^:
 order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #eee; }
         .delete-prod-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; margin-top: 5px; cursor: pointer;}
     </style>
@@ -176,7 +172,6 @@ order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margi
     <div id="cart-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('cart-modal')">&times;</span><h2>Корзина</h2><div id="cart-items-container"></div><div class="cart-total"><span>Итого:</span><span id="cart-total-price">0 ₽</span></div><button class="btn-primary" onclick="startCheckout()" style="margin-top:20px;">Оформить заказ</button></div></div>
     <div id="age-warning-modal" class="modal"><div class="modal-content" style="text-align: center;"><div style="font-size: 40px; margin-bottom: 10px;">🔞</div><h2>Внимание!</h2><p>Учитывайте, что если ваш возраст меньше 18 лет - курьер в праве отказать вам в выдаче товара.</p><button class="btn-primary" onclick="showAddressForm()">Всё понятно, мне есть 18</button><button class="btn-primary btn-danger" onclick="closeModal('age-warning-modal')" style="margin-top: 10px; background: #999;">Отмена</button></div></div>
 
-> ^:
 <div id="address-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('address-modal')">&times;</span><h2>Оформление</h2><div class="form-group"><label>Адрес доставки</label><textarea id="delivery-address" rows="3"></textarea></div><div class="form-group"><label>Комментарий</label><textarea id="order-comment" rows="2"></textarea></div><button class="btn-primary" onclick="submitOrder()">Подтвердить заказ</button></div></div>
     
     <!-- ADMIN MODAL (UPDATED) -->
@@ -242,7 +237,6 @@ order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margi
         <div class="modal-content">
             <span class="close-btn" onclick="document.
 
-> ^:
 getElementById('edit-order-modal').classList.remove('active')">&times;</span>
             <h3>Редактировать заказ</h3>
             <input type="hidden" id="edit-order-id">
@@ -291,7 +285,6 @@ getElementById('edit-order-modal').classList.remove('active')">&times;</span>
         function loadBonusTab() { if (!userData) return; document.getElementById('user-name').textContent = userData.name; document.getElementById('user-phone').textContent = userData.phone; document.getElementById('points-count').textContent = userData.points || 0; document.getElementById('referral-code').textContent = userData.referral_code; const qrContainer = document.getElementById('qr-code'); qrContainer.innerHTML = ''; new QRCode(qrContainer, { text: `user:${userData.referral_code}`, width: 200, height: 200 }); }
         async function fetchCart() { if (!userData) return; try { const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`); cart = await res.
 
-> ^:
 json(); updateCartBadge(); if (document.getElementById('catalog-tab').classList.contains('active')) filterProducts(); } catch (e) {} }
         async function loadCatalog() { const container = document.getElementById('products-container'); if (cart.length === 0) await fetchCart(); if (products.length === 0) { try { const res = await fetch(`${API_URL}/api/products`); products = await res.json(); displayProducts(products); } catch (e) { container.innerHTML = '<p>Ошибка</p>'; } } else displayProducts(products); }
         function setCategory(cat) { currentCategory = cat; document.querySelectorAll('.cat-btn').forEach(btn => { btn.classList.remove('active'); if (btn.textContent === cat || (cat === 'all' && btn.textContent === 'Все')) btn.classList.add('active'); }); filterProducts(); }
@@ -314,7 +307,6 @@ json(); updateCartBadge(); if (document.getElementById('catalog-tab').classList.
         async function removeFromCart(id, all = false) { try { await fetch(`${API_URL}/api/cart/remove`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id, removeAll: all }) }); await fetchCart(); if (document.getElementById('cart-modal').classList.contains('active')) openCart(); } catch (e) {} }
         async function openCart() { await fetchCart(); document.getElementById('cart-modal').classList.add('active'); const container = document.getElementById('cart-items-container'); const totalEl = document.getElementById('cart-total-price'); container.innerHTML = ''; let total = 0; if (cart.length === 0) { container.innerHTML = '<p>Пусто</p>'; totalEl.textContent = '0 ₽'; } else { cart.forEach(i => { const sum = i.price * i.quantity; total += sum; container.innerHTML += width: 100%; padding: 14px; border: 2px solid var(--border-color);
 
-> ^:
 border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
             background: white; font-family: inherit;
         }
@@ -371,7 +363,6 @@ border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
             await fetch(`${API_URL}/api/admin/expense`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, amount: amt, comment: cmt }) });
             document.getElementById('expense-amount').value = ''; document.getElementById('expense-comment').value = '';
 
-> ^:
 openAdminPanel();
         }
 
@@ -446,7 +437,6 @@ openAdminPanel();
 
                     return `
 
-> ^:
 <div class="order-admin-card">
                             <div style="font-weight:bold; font-size:16px;">Заказ #${o.id} <span style="font-weight:normal; font-size:12px; color:#888;">${date}</span></div>
                             <div style="margin-top:5px;"><b>Клиент:</b> ${o.user_data?.name} (<a href="https://t.me/${o.user_data?.username}" target="_blank">@${o.user_data?.username}</a>)</div>
@@ -492,3 +482,4 @@ openAdminPanel();
     </script>
 </body>
 </html>
+
