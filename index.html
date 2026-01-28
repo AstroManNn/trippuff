@@ -152,6 +152,23 @@
         .db-table th, .db-table td { padding: 8px; border: 1px solid #ddd; text-align: left; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;}
         .db-table th { background: #f0f0f0; }
         .db-action-btn { border: none; background: none; cursor: pointer; font-size: 16px; margin-right: 5px; }
+
+        /* PHOTO WIZARD */
+        .wiz-card {
+            border: 2px dashed #999; border-radius: 12px; padding: 15px;
+            display: flex; flex-direction: column; align-items: center;
+            background: #fff; cursor: pointer; transition: 0.2s; position: relative;
+        }
+        .wiz-card:active { transform: scale(0.98); background: #f0f0f0; }
+        .wiz-img { width: 100%; height: 120px; background: #eee; border-radius: 8px; margin-bottom: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .wiz-img img { width: 100%; height: 100%; object-fit: cover; }
+        .wiz-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); color: white; display: none;
+            align-items: center; justify-content: center; border-radius: 12px;
+            font-weight: bold; font-size: 18px;
+        }
+        .wiz-card.uploading .wiz-overlay { display: flex; }
     </style>
 </head>
 <body>
@@ -219,7 +236,21 @@
 
             <!-- TAB 3: PRODUCTS -->
             <div id="admin-products-tab" class="admin-tab-content">
-                <h3>Добавить товар</h3>
+                
+                <!-- IMPORT BLOCK -->
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c8e6c9;">
+                    <h4 style="margin-bottom:10px">🚀 Импорт и Фото</h4>
+                    <div style="display:flex; gap:10px;">
+                        <input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="processCsvFile()">
+                        <button class="btn-primary btn-green" style="margin:0; font-size:14px;" onclick="document.getElementById('csv-file-input').click()">📥 1. Импорт Excel</button>
+                        <button class="btn-primary btn-blue" style="margin:0; font-size:14px;" onclick="openPhotoWizard()">📸 2. Мастер Фото</button>
+                    </div>
+                    <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                        CSV: Категория; Название; Описание; Закуп; Продажа; Кол-во
+                    </p>
+                </div>
+
+                <h3>Добавить товар (вручную)</h3>
                 <div class="form-group">
                     <select id="new-prod-cat">
                         <option value="Жидкости">Жидкости</option>
@@ -298,6 +329,18 @@
             <h3 id="db-edit-title">Редактирование</h3>
             <div id="db-edit-fields"></div>
             <button class="btn-primary" onclick="saveDbRecord()">Сохранить</button>
+        </div>
+    </div>
+
+    <!-- PHOTO WIZARD MODAL -->
+    <div id="photo-wizard-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('photo-wizard-modal').classList.remove('active')">&times;</span>
+            <h3>📸 Мастер Фото</h3>
+            <p style="font-size:14px; color:#666; margin-bottom:15px;">Нажмите на карточку, чтобы добавить фото. Оно сохранится автоматически.</p>
+            
+            <input type="file" id="wiz-file-input" accept="image/*" style="display:none">
+            <div id="wiz-grid" class="products-grid"></div>
         </div>
     </div>
 
@@ -391,7 +434,130 @@
             openAdminPanel();
         }
 
-        // PRODUCTS MANAGEMENT
+        // PRODUCTS MANAGEMENT (CSV & MANUAL)
+        function processCsvFile() {
+            const fileInput = document.getElementById('csv-file-input');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const text = e.target.result;
+                const rows = text.split('\n');
+                
+                const productsToUpload = [];
+
+                rows.forEach((row, index) => {
+                    if (!row.trim()) return;
+                    const cols = row.split(';'); 
+                    if (cols.length < 5) return; 
+
+                    const clean = (val) => val ? val.trim().replace(/^"|"$/g, '') : '';
+                    if (index === 0 && (cols[0].toLowerCase().includes('кат') || cols[0].toLowerCase().includes('cat'))) return;
+
+                    productsToUpload.push({
+                        category: clean(cols[0]) || 'Разное',
+                        name: clean(cols[1]),
+                        description: clean(cols[2]),
+                        purchase_price: parseFloat(clean(cols[3]).replace(',', '.')) || 0,
+                        price: parseFloat(clean(cols[4]).replace(',', '.')) || 0,
+                        stock: parseInt(clean(cols[5])) || 0
+                    });
+                });
+
+                if (productsToUpload.length === 0) return alert('Файл пуст или неверный формат');
+                if (!confirm(`Найдено ${productsToUpload.length} товаров. Загрузить?`)) { fileInput.value = ''; return; }
+
+                try {
+                    const res = await fetch(`${API_URL}/api/admin/products/batch`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: userData.telegram_id, products: productsToUpload })
+                    });
+                    const data = await res.json();
+                    if (data.success) { alert(`Успешно загружено: ${data.count} шт.`); loadAdminProducts(); } 
+                    else { alert('Ошибка загрузки'); }
+                } catch (e) { alert('Ошибка сети'); }
+                fileInput.value = '';
+            };
+            reader.readAsText(file, 'windows-1251'); 
+        }
+
+        // --- NEW PHOTO WIZARD LOGIC ---
+        let wizActiveId = null;
+
+        function openPhotoWizard() {
+            // 1. Filter products with no photo (placeholder)
+            const noPhotoProds = products.filter(p => !p.image_url || p.image_url.includes('placeholder'));
+            const container = document.getElementById('wiz-grid');
+            
+            if (noPhotoProds.length === 0) {
+                alert('Все товары уже с фото! 🎉');
+                return;
+            }
+
+            // 2. Render cards
+            container.innerHTML = noPhotoProds.map(p => `
+                <div class="wiz-card" id="wiz-card-${p.id}" onclick="triggerWizUpload(${p.id})">
+                    <div class="wiz-img"><img src="${p.image_url || ''}" id="wiz-img-${p.id}"></div>
+                    <div style="font-weight:bold; font-size:14px;">${p.name}</div>
+                    <div style="font-size:12px; color:#666;">${p.price} ₽</div>
+                    <div class="wiz-overlay" id="wiz-over-${p.id}">Загрузка...</div>
+                </div>
+            `).join('');
+
+            document.getElementById('photo-wizard-modal').classList.add('active');
+        }
+
+        function triggerWizUpload(id) {
+            wizActiveId = id;
+            document.getElementById('wiz-file-input').click();
+        }
+
+        // Handle file selection in Wizard
+        document.getElementById('wiz-file-input').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file || !wizActiveId) return;
+
+            // UI Feedback
+            const card = document.getElementById(`wiz-card-${wizActiveId}`);
+            card.classList.add('uploading');
+
+            const formData = new FormData();
+            formData.append('userId', userData.telegram_id);
+            formData.append('photo', file);
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/product/${wizActiveId}/image`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    // Update Image UI immediately
+                    const img = document.getElementById(`wiz-img-${wizActiveId}`);
+                    img.src = data.imageUrl;
+                    card.classList.remove('uploading');
+                    
+                    // Update global product list so we don't have to reload
+                    const prod = products.find(p => p.id === wizActiveId);
+                    if (prod) prod.image_url = data.imageUrl;
+
+                } else {
+                    alert('Ошибка загрузки');
+                    card.classList.remove('uploading');
+                }
+            } catch(e) {
+                alert('Ошибка сети');
+                card.classList.remove('uploading');
+            }
+
+            // Reset input
+            this.value = '';
+        });
+
+
         async function addNewProduct() {
             const formData = new FormData();
             formData.append('userId', userData.telegram_id);
@@ -403,8 +569,8 @@
             formData.append('stock', document.getElementById('new-prod-stock').value);
             formData.append('photo', document.getElementById('new-prod-file').files[0]);
 
-            if (!formData.get('name') || !formData.get('price') || !document.getElementById('new-prod-file').files[0]) {
-                return alert('Заполните все поля и выберите фото');
+            if (!formData.get('name') || !formData.get('price')) {
+                return alert('Заполните обязательные поля');
             }
 
             const btn = event.target; btn.textContent = 'Загрузка...'; btn.disabled = true;
@@ -594,7 +760,7 @@
             } catch(e) { console.error(e); alert('Ошибка сети'); }
         }
 
-        // --- VISUAL DATABASE MANAGER (NEW) ---
+        // --- VISUAL DATABASE MANAGER ---
         let currentDbData = [];
 
         async function loadDbTable() {
@@ -612,7 +778,6 @@
 
                 currentDbData = data;
                 
-                // Создаем таблицу с кнопками
                 const cols = Object.keys(data[0]);
                 let tableHtml = '<table class="db-table"><thead><tr><th>Действия</th>';
                 cols.forEach(c => tableHtml += `<th>${c}</th>`);
@@ -620,7 +785,6 @@
                 
                 data.forEach((row, idx) => {
                     tableHtml += '<tr>';
-                    // Кнопки действий
                     tableHtml += `
                         <td>
                             <button class="db-action-btn" onclick="openEditRecord(${idx})">✏️</button>
@@ -647,14 +811,11 @@
         }
 
         function openCreateRecordModal() {
-            currentDbId = null; // null means CREATE mode
-            
-            // Generate empty template based on current table structure if data exists, else hardcode common fields
+            currentDbId = null; 
             let template = {};
             if (currentDbData.length > 0) {
                 Object.keys(currentDbData[0]).forEach(k => template[k] = '');
             } else {
-                // Fallback if table is empty
                 if (currentDbTable === 'faq') template = { question: '', answer: '' };
                 if (currentDbTable === 'expenses') template = { amount: '', comment: '' };
             }
@@ -668,45 +829,34 @@
             container.innerHTML = '';
 
             Object.keys(data).forEach(key => {
-                // Don't show technical fields for creation/editing logic mostly
                 if (key === 'created_at') return;
-
                 const val = data[key];
                 const div = document.createElement('div');
                 div.className = 'form-group';
-                
                 const label = document.createElement('label');
                 label.textContent = key;
-                
                 let input;
-                // If ID, make it read-only
                 if (key === 'id') {
                     input = document.createElement('input');
                     input.value = val;
                     input.readOnly = true;
-                } 
-                // Long text for descriptions/questions
-                else if (key === 'description' || key === 'answer' || key === 'details' || key === 'image_url') {
+                } else if (key === 'description' || key === 'answer' || key === 'details' || key === 'image_url') {
                     input = document.createElement('textarea');
                     input.rows = 3;
                     input.value = val;
-                } 
-                else {
+                } else {
                     input = document.createElement('input');
                     input.value = val;
                     if (key === 'price' || key === 'purchase_price' || key === 'stock' || key === 'points' || key === 'amount') {
                         input.type = 'number';
                     }
                 }
-                
                 input.id = `db-field-${key}`;
-                input.dataset.key = key; // Store key name
-
+                input.dataset.key = key; 
                 div.appendChild(label);
                 div.appendChild(input);
                 container.appendChild(div);
             });
-
             document.getElementById('db-edit-modal').classList.add('active');
         }
 
@@ -714,12 +864,9 @@
             const inputs = document.querySelectorAll('#db-edit-fields [data-key]');
             const payload = {};
             inputs.forEach(inp => {
-                if (inp.readOnly) return; // Skip ID
+                if (inp.readOnly) return; 
                 payload[inp.dataset.key] = inp.value;
             });
-
-            // Add ID for context header if create new (user-id) needed? 
-            // We pass payload to backend.
 
             const method = currentDbId ? 'PUT' : 'POST';
             const url = currentDbId 
@@ -729,20 +876,11 @@
             try {
                 const res = await fetch(url, {
                     method: method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'user-id': userData.telegram_id // Auth header
-                    },
+                    headers: { 'Content-Type': 'application/json', 'user-id': userData.telegram_id },
                     body: JSON.stringify(payload)
                 });
-                
-                if (res.ok) {
-                    alert('Сохранено');
-                    document.getElementById('db-edit-modal').classList.remove('active');
-                    loadDbTable();
-                } else {
-                    alert('Ошибка сохранения');
-                }
+                if (res.ok) { alert('Сохранено'); document.getElementById('db-edit-modal').classList.remove('active'); loadDbTable(); } 
+                else { alert('Ошибка сохранения'); }
             } catch(e) { alert('Ошибка сети'); }
         }
 
