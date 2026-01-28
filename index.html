@@ -14,6 +14,7 @@
             --secondary-color: #999;
             --border-color: #ccc;
             --accent-color: #ff6b6b;
+            --red-color: #d32f2f;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -45,7 +46,6 @@
         }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102, 102, 102, 0.3); }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-        
         .btn-danger { background: linear-gradient(135deg, #ff6b6b, #d32f2f); }
 
         header {
@@ -77,7 +77,6 @@
         .tab-content { display: none; padding: 20px; opacity: 0; transition: opacity 0.3s ease; }
         .tab-content.active { display: block; opacity: 1; }
         
-        /* Bonus Card */
         .bonus-card {
             background: linear-gradient(135deg, var(--card-bg), #e8e8e8); border-radius: 16px;
             padding: 30px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -98,7 +97,6 @@
         }
         .points-value { font-weight: 700; font-size: 36px; color: var(--accent-color); display: block; }
         
-        /* Catalog */
         .search-bar { margin-bottom: 20px; width: 100%; }
         .search-bar input {
             width: 100%; padding: 14px 16px; border: 2px solid var(--border-color);
@@ -119,14 +117,26 @@
         .product-price { color: var(--accent-color); font-weight: 700; font-size: 20px; margin-bottom: 8px; }
         .product-description { color: var(--secondary-color); font-size: 14px; margin-bottom: 15px; flex-grow: 1; }
         
+        /* КНОПКА В КОРЗИНУ И УПРАВЛЕНИЕ КОЛИЧЕСТВОМ */
         .add-to-cart-btn {
             background-color: var(--primary-color); color: white; border: none;
             padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;
             transition: background 0.2s; width: 100%;
         }
         .add-to-cart-btn:hover { background-color: #444; }
+        
+        .qty-control-catalog {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--red-color); color: white; border-radius: 8px;
+            padding: 5px; width: 100%;
+        }
+        .qty-control-catalog button {
+            background: none; border: none; color: white; font-weight: bold; font-size: 18px;
+            padding: 0 15px; cursor: pointer;
+        }
+        .qty-control-catalog span { font-weight: 600; }
+        .in-cart-text { font-size: 12px; text-transform: uppercase; margin-bottom: 2px; }
 
-        /* Floating Cart */
         .cart-fab {
             position: fixed; bottom: 30px; right: 20px;
             width: 60px; height: 60px;
@@ -145,7 +155,6 @@
             border: 2px solid white;
         }
 
-        /* Modals */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto;
@@ -183,7 +192,6 @@
     </style>
 </head>
 <body>
-    <!-- Регистрация -->
     <div id="registration-screen" class="screen active">
         <div class="container">
             <div class="welcome-logo">
@@ -203,7 +211,6 @@
         </div>
     </div>
 
-    <!-- Основной экран -->
     <div id="main-screen" class="screen">
         <header>
             <div class="logo">TripPuff</div>
@@ -214,7 +221,6 @@
             <button class="tab-btn" onclick="switchTab('catalog')">Каталог</button>
         </nav>
 
-        <!-- Бонусная карта -->
         <div id="bonus-tab" class="tab-content active">
             <div class="bonus-card">
                 <h2>Ваша бонусная карта</h2>
@@ -233,7 +239,6 @@
             </div>
         </div>
 
-        <!-- Каталог -->
         <div id="catalog-tab" class="tab-content">
             <div class="search-bar">
                 <input type="text" id="search-input" placeholder="Поиск товаров..." oninput="filterProducts()">
@@ -243,14 +248,12 @@
             </div>
         </div>
         
-        <!-- Кнопка корзины -->
         <div class="cart-fab" onclick="openCart()">
             🛒
             <div id="cart-badge" class="cart-badge" style="display:none">0</div>
         </div>
     </div>
 
-    <!-- Модальное окно FAQ -->
     <div id="faq-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('faq-modal')">&times;</span>
@@ -259,7 +262,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно Корзины -->
     <div id="cart-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('cart-modal')">&times;</span>
@@ -273,7 +275,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно Предупреждения (18+) -->
     <div id="age-warning-modal" class="modal">
         <div class="modal-content" style="text-align: center;">
             <div style="font-size: 40px; margin-bottom: 10px;">🔞</div>
@@ -286,7 +287,6 @@
         </div>
     </div>
 
-    <!-- Модальное окно Адреса -->
     <div id="address-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('address-modal')">&times;</span>
@@ -306,7 +306,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
-        // ⚠️ ЗАМЕНИ НА СВОЙ АДРЕС С RAILWAY!
+        // ⚠️ ЗАМЕНИ НА АДРЕС СВОЕГО БЭКЕНДА
         const API_URL = 'https://ytiiiipuff-production.up.railway.app'; 
         
         let userData = null;
@@ -317,8 +317,7 @@
             try {
                 const initData = Telegram.WebApp.initDataUnsafe;
                 const userId = initData?.user?.id;
-                
-                // const userId = 123456789; // Тест в браузере
+                // const userId = 123456789; // для тестов
 
                 if (!userId) { alert('Откройте в Telegram!'); return; }
 
@@ -326,11 +325,10 @@
                 Telegram.WebApp.setHeaderColor('#e0e0e0');
                 
                 userData = await checkUserRegistration(userId);
-                
                 if (userData) {
                     showMainScreen();
                     loadBonusTab();
-                    updateCartBadge();
+                    await fetchCart(); // Сначала грузим корзину
                 } else {
                     showRegistrationScreen();
                 }
@@ -345,10 +343,7 @@
             return null;
         }
 
-        function showRegistrationScreen() {
-            document.getElementById('registration-screen').classList.add('active');
-        }
-
+        function showRegistrationScreen() { document.getElementById('registration-screen').classList.add('active'); }
         function showMainScreen() {
             document.getElementById('registration-screen').classList.remove('active');
             document.getElementById('main-screen').classList.add('active');
@@ -358,27 +353,18 @@
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
             const tgUser = Telegram.WebApp.initDataUnsafe?.user;
-            
             if (!name || !phone) return alert('Заполните поля');
-
             const res = await fetch(`${API_URL}/api/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    userId: tgUser.id, 
-                    name, 
-                    phone,
-                    username: tgUser.username || '' // Отправляем юзернейм
-                })
+                body: JSON.stringify({ userId: tgUser.id, name, phone, username: tgUser.username || '' })
             });
             const data = await res.json();
             if (data.success) {
                 userData = data.user;
                 showMainScreen();
                 loadBonusTab();
-            } else {
-                alert(data.message);
-            }
+            } else { alert(data.message); }
         }
 
         function switchTab(tab) {
@@ -395,27 +381,63 @@
             document.getElementById('user-phone').textContent = userData.phone;
             document.getElementById('points-count').textContent = userData.points || 0;
             document.getElementById('referral-code').textContent = userData.referral_code;
-            
             const qrContainer = document.getElementById('qr-code');
             qrContainer.innerHTML = '';
             new QRCode(qrContainer, { text: `user:${userData.referral_code}`, width: 200, height: 200 });
         }
 
+        async function fetchCart() {
+            if (!userData) return;
+            try {
+                const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`);
+                cart = await res.json();
+                updateCartBadge();
+                // Если каталог уже открыт, перерисовываем его, чтобы обновить кнопки
+                if (document.getElementById('catalog-tab').classList.contains('active')) {
+                    filterProducts(); // Используем filterProducts для перерисовки
+                }
+            } catch (e) { console.error(e); }
+        }
+
         async function loadCatalog() {
             const container = document.getElementById('products-container');
-            if (products.length > 0) return;
-            
-            try {
-                const res = await fetch(`${API_URL}/api/products`);
-                products = await res.json();
-                displayProducts(products);
-            } catch (e) { container.innerHTML = '<p>Ошибка загрузки</p>'; }
+            // Если корзина еще не загружена, загружаем её (важно для кнопок)
+            if (cart.length === 0) await fetchCart();
+
+            if (products.length === 0) {
+                try {
+                    const res = await fetch(`${API_URL}/api/products`);
+                    products = await res.json();
+                    displayProducts(products);
+                } catch (e) { container.innerHTML = '<p>Ошибка загрузки</p>'; }
+            } else {
+                displayProducts(products); // Просто перерисовываем с учетом корзины
+            }
         }
 
         function displayProducts(list) {
             const container = document.getElementById('products-container');
             container.innerHTML = '';
+            
             list.forEach(p => {
+                const cartItem = cart.find(c => c.product_id === p.id);
+                let buttonHtml = '';
+                
+                if (cartItem) {
+                    buttonHtml = `
+                        <div class="qty-control-catalog">
+                            <button onclick="changeQtyFromCatalog(${p.id}, -1)">-</button>
+                            <div style="text-align:center">
+                                <div class="in-cart-text">В корзине</div>
+                                <span>${cartItem.quantity}</span>
+                            </div>
+                            <button onclick="changeQtyFromCatalog(${p.id}, 1)">+</button>
+                        </div>
+                    `;
+                } else {
+                    buttonHtml = `<button class="add-to-cart-btn" onclick="addToCart(${p.id})">В корзину +</button>`;
+                }
+
                 const el = document.createElement('div');
                 el.className = 'product-card';
                 el.innerHTML = `
@@ -425,7 +447,7 @@
                     <div class="product-name">${p.name}</div>
                     <div class="product-price">${p.price} ₽</div>
                     <div class="product-description">${p.description}</div>
-                    <button class="add-to-cart-btn" onclick="addToCart(${p.id})">В корзину +</button>
+                    ${buttonHtml}
                 `;
                 container.appendChild(el);
             });
@@ -437,54 +459,56 @@
             displayProducts(filtered);
         }
 
-        // --- КОРЗИНА ---
-        async function updateCartBadge() {
-            if (!userData) return;
-            try {
-                const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`);
-                cart = await res.json();
-                
-                const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-                const badge = document.getElementById('cart-badge');
-                if (count > 0) {
-                    badge.style.display = 'flex';
-                    badge.textContent = count;
-                } else {
-                    badge.style.display = 'none';
-                }
-            } catch (e) { console.error(e); }
+        function updateCartBadge() {
+            const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const badge = document.getElementById('cart-badge');
+            if (count > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = count;
+            } else {
+                badge.style.display = 'none';
+            }
         }
 
         async function addToCart(productId) {
             Telegram.WebApp.HapticFeedback.impactOccurred('light');
             try {
                 await fetch(`${API_URL}/api/cart/add`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: userData.telegram_id, productId })
                 });
-                updateCartBadge();
-            } catch (e) { alert('Ошибка добавления'); }
+                await fetchCart(); // Перезагружаем корзину и кнопки
+            } catch (e) { alert('Ошибка'); }
+        }
+
+        async function changeQtyFromCatalog(productId, change) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            if (change === 1) {
+                await addToCart(productId);
+            } else {
+                await removeFromCart(productId);
+            }
         }
 
         async function removeFromCart(productId, removeAll = false) {
              try {
                 await fetch(`${API_URL}/api/cart/remove`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId: userData.telegram_id, productId, removeAll })
                 });
-                await updateCartBadge();
-                openCart();
-            } catch (e) { alert('Ошибка удаления'); }
+                await fetchCart();
+                // Если модалка открыта, обновляем её
+                if (document.getElementById('cart-modal').classList.contains('active')) {
+                    openCart(); 
+                }
+            } catch (e) { alert('Ошибка'); }
         }
 
         async function openCart() {
-            await updateCartBadge();
+            await fetchCart();
             const modal = document.getElementById('cart-modal');
             const container = document.getElementById('cart-items-container');
             const totalEl = document.getElementById('cart-total-price');
-            
             container.innerHTML = '';
             let total = 0;
 
@@ -505,7 +529,7 @@
                         <div class="cart-controls">
                             <button class="qty-btn" onclick="removeFromCart(${item.product_id})">-</button>
                             <span>${item.quantity}</span>
-                            <button class="qty-btn" onclick="addToCart(${item.product_id}); setTimeout(openCart, 100);">+</button>
+                            <button class="qty-btn" onclick="addToCart(${item.product_id})">+</button>
                         </div>
                     `;
                     container.appendChild(el);
@@ -515,7 +539,6 @@
             modal.classList.add('active');
         }
 
-        // --- ЗАКАЗ ---
         function startCheckout() {
             if (cart.length === 0) return alert('Корзина пуста');
             closeModal('cart-modal');
@@ -530,43 +553,27 @@
         async function submitOrder() {
             const address = document.getElementById('delivery-address').value;
             const comment = document.getElementById('order-comment').value;
-
-            if (!address) return alert('Пожалуйста, укажите адрес доставки');
-
+            if (!address) return alert('Укажите адрес');
             const btn = event.target;
-            btn.textContent = 'Отправка...';
-            btn.disabled = true;
+            btn.textContent = 'Отправка...'; btn.disabled = true;
 
             try {
-                // Отправляем запрос, бэкенд сам подтянет имя и телефон из базы
                 const res = await fetch(`${API_URL}/api/order`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: userData.telegram_id,
-                        address,
-                        comment
-                    })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: userData.telegram_id, address, comment })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    alert('Заказ успешно оформлен!');
+                    alert('Заказ оформлен!');
                     closeModal('address-modal');
                     document.getElementById('delivery-address').value = '';
                     document.getElementById('order-comment').value = '';
-                    updateCartBadge();
-                } else {
-                    alert('Ошибка: ' + data.message);
-                }
-            } catch (e) {
-                alert('Ошибка соединения');
-            } finally {
-                btn.textContent = 'Подтвердить заказ';
-                btn.disabled = false;
-            }
+                    await fetchCart();
+                } else { alert(data.message); }
+            } catch (e) { alert('Ошибка'); } 
+            finally { btn.textContent = 'Подтвердить заказ'; btn.disabled = false; }
         }
 
-        // --- УТИЛИТЫ ---
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         async function openFAQ() {
             const modal = document.getElementById('faq-modal');
@@ -575,13 +582,8 @@
             try {
                 const res = await fetch(`${API_URL}/api/faq`);
                 const data = await res.json();
-                content.innerHTML = data.map(i => `
-                    <div style="margin-bottom:15px">
-                        <h3 style="color:var(--primary-color)">${i.question}</h3>
-                        <p>${i.answer}</p>
-                    </div>
-                `).join('');
-            } catch (e) { content.innerHTML = 'Ошибка загрузки'; }
+                content.innerHTML = data.map(i => `<div style="margin-bottom:15px"><h3 style="color:var(--primary-color)">${i.question}</h3><p>${i.answer}</p></div>`).join('');
+            } catch (e) { content.innerHTML = 'Ошибка'; }
         }
 
         document.addEventListener('DOMContentLoaded', initApp);
