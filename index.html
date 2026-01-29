@@ -1,0 +1,1633 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#666666">
+    <title>TripPuff</title>
+    <style>
+        :root{
+            /* Theme */
+            --bg-0:#070A12;
+            --bg-1:#0B1222;
+            --card-bg: rgba(255,255,255,.06);
+            --card-bg-2: rgba(255,255,255,.08);
+            --card-solid:#0E1730;
+            --text-color: rgba(255,255,255,.92);
+            --muted: rgba(255,255,255,.66);
+            --muted-2: rgba(255,255,255,.52);
+
+            --primary-color:#7C5CFF;
+            --secondary-color:#38BDF8;
+            --accent-color:#FF4D9D;
+            --green-color:#34D399;
+            --red-color:#FB7185;
+            --blue-color:#60A5FA;
+
+            --border-color: rgba(255,255,255,.12);
+            --border-strong: rgba(255,255,255,.18);
+
+            /* Elevation / radius */
+            --r-sm: 12px;
+            --r-md: 16px;
+            --r-lg: 22px;
+            --shadow-1: 0 10px 30px rgba(0,0,0,.30);
+            --shadow-2: 0 20px 55px rgba(0,0,0,.45);
+
+            /* Motion */
+            --ease-out: cubic-bezier(.16,1,.3,1);
+            --ease-in: cubic-bezier(.7,0,.84,0);
+            --t-fast: 160ms;
+            --t-med: 260ms;
+            --t-slow: 420ms;
+        }
+
+        *{ margin:0; padding:0; box-sizing:border-box; }
+        html,body{ height:100%; }
+
+        body{
+            font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-color);
+            line-height:1.55;
+            background:
+                radial-gradient(1200px 700px at 10% 0%, rgba(124,92,255,.40), transparent 55%),
+                radial-gradient(900px 600px at 95% 10%, rgba(56,189,248,.25), transparent 55%),
+                radial-gradient(900px 700px at 60% 105%, rgba(255,77,157,.20), transparent 55%),
+                linear-gradient(180deg, var(--bg-0), var(--bg-1));
+            overscroll-behavior:none;
+            padding-bottom: env(safe-area-inset-bottom);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Subtle grain */
+        body::before{
+            content:"";
+            position:fixed; inset:-10%;
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+            mix-blend-mode: overlay;
+            opacity:.20;
+            pointer-events:none;
+            z-index:-1;
+        }
+
+        /* Smooth transitions for screens */
+        .screen{
+            display:none;
+            min-height:100vh;
+            padding-bottom:88px;
+            opacity:0;
+            transform: translateY(8px);
+            transition: opacity var(--t-med) var(--ease-out), transform var(--t-med) var(--ease-out);
+        }
+        .screen.active{
+            display:block;
+            opacity:1;
+            transform: translateY(0);
+        }
+
+        .container{
+            max-width: 600px;
+            margin: 48px auto;
+            padding: 20px;
+            text-align:center;
+        }
+
+        .welcome-logo{ margin-bottom: 28px; }
+        .logo-icon{
+            font-size: 64px;
+            margin-bottom: 18px;
+            filter: drop-shadow(0 16px 26px rgba(0,0,0,.35));
+            animation: floaty 4.5s var(--ease-out) infinite;
+        }
+        @keyframes floaty{
+            0%,100%{ transform: translateY(0) }
+            50%{ transform: translateY(-6px) }
+        }
+        h1{
+            font-size: 34px;
+            letter-spacing: .4px;
+            background: linear-gradient(135deg, #fff, rgba(255,255,255,.65));
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+        }
+        .welcome-text{
+            color: var(--muted);
+            margin-bottom: 36px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        /* Form elements */
+        .form-group{ margin-bottom: 18px; text-align:left; }
+        .form-group label{
+            display:block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--muted);
+            letter-spacing: .2px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select,
+        .search-bar input,
+        #expense-amount,#expense-comment{
+            width:100%;
+            padding: 14px 14px;
+            border-radius: var(--r-sm);
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,.06);
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+            transition: border-color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+            box-shadow: 0 0 0 rgba(0,0,0,0);
+            backdrop-filter: blur(10px);
+        }
+        .form-group textarea{ resize: vertical; min-height: 70px; }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder,
+        #expense-amount::placeholder,#expense-comment::placeholder,
+        .search-bar input::placeholder{
+            color: rgba(255,255,255,.45);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus,
+        .search-bar input:focus,
+        #expense-amount:focus,#expense-comment:focus{
+            border-color: rgba(124,92,255,.85);
+            box-shadow: 0 0 0 4px rgba(124,92,255,.18);
+            background: rgba(255,255,255,.08);
+        }
+        .form-group input:read-only{
+            background: rgba(255,255,255,.04);
+            color: rgba(255,255,255,.55);
+            cursor:not-allowed;
+        }
+
+        .phone-input-wrapper{
+            display:flex;
+            align-items:center;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border-color);
+            border-radius: var(--r-sm);
+            padding: 2px 14px;
+            transition: border-color var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+            backdrop-filter: blur(10px);
+        }
+        .phone-input-wrapper:focus-within{
+            border-color: rgba(124,92,255,.85);
+            box-shadow: 0 0 0 4px rgba(124,92,255,.18);
+            background: rgba(255,255,255,.08);
+        }
+        .phone-prefix{
+            font-size:16px;
+            color: rgba(255,255,255,.82);
+            font-weight: 700;
+            margin-right: 6px;
+            user-select:none;
+        }
+        .phone-input-wrapper input{
+            border:none !important;
+            padding: 12px 0 !important;
+            margin:0 !important;
+            width:100%;
+            outline:none !important;
+            background: transparent !important;
+            box-shadow:none !important;
+        }
+
+        /* Buttons */
+        .btn-primary{
+            width: 100%;
+            padding: 16px 16px;
+            border: 0;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            color: white;
+            background: linear-gradient(135deg, rgba(124,92,255,1), rgba(56,189,248,1));
+            box-shadow: 0 14px 35px rgba(124,92,255,.22);
+            transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out), filter var(--t-fast) var(--ease-out);
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-primary::before{
+            content:"";
+            position:absolute; inset:-2px;
+            background: radial-gradient(700px 200px at 20% 0%, rgba(255,255,255,.38), transparent 60%);
+            opacity:.55;
+            transform: translateY(-40%);
+            transition: transform var(--t-med) var(--ease-out), opacity var(--t-med) var(--ease-out);
+            pointer-events:none;
+        }
+        .btn-primary:hover{ transform: translateY(-2px); box-shadow: 0 18px 45px rgba(124,92,255,.30); filter: saturate(1.05); }
+        .btn-primary:hover::before{ transform: translateY(0); opacity:.75; }
+        .btn-primary:active{ transform: translateY(0) scale(.99); box-shadow: 0 10px 26px rgba(0,0,0,.35); }
+        .btn-danger{ background: linear-gradient(135deg, #FB7185, #EF4444); box-shadow: 0 14px 35px rgba(239,68,68,.22); }
+        .btn-green{ background: linear-gradient(135deg, #34D399, #22C55E); box-shadow: 0 14px 35px rgba(34,197,94,.18); }
+        .btn-blue{ background: linear-gradient(135deg, #60A5FA, #3B82F6); margin-top: 5px; padding: 10px; font-size: 14px; box-shadow: 0 12px 28px rgba(59,130,246,.18); }
+
+        /* Top bar */
+        header{
+            display:grid;
+            grid-template-columns: 44px 1fr 44px;
+            align-items:center;
+            padding: 14px 18px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10,14,26,.65);
+            border-bottom: 1px solid rgba(255,255,255,.10);
+            backdrop-filter: blur(14px);
+        }
+        .profile-icon,.help-icon{
+            width: 38px;
+            height: 38px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+            border: 1px solid rgba(255,255,255,.12);
+            color: rgba(255,255,255,.92);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight: 900;
+            cursor:pointer;
+            box-shadow: 0 10px 24px rgba(0,0,0,.25);
+            transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+        }
+        .profile-icon:hover,.help-icon:hover{ transform: translateY(-1px); box-shadow: 0 16px 34px rgba(0,0,0,.32); background: linear-gradient(135deg, rgba(124,92,255,.20), rgba(56,189,248,.10)); }
+        .profile-icon:active,.help-icon:active{ transform: translateY(0) scale(.98); }
+        .profile-icon{ justify-self:start; }
+        .help-icon{ justify-self:end; }
+
+        .logo{
+            font-size: 22px;
+            font-weight: 900;
+            text-align:center;
+            letter-spacing: .6px;
+            background: linear-gradient(135deg, rgba(255,255,255,.95), rgba(255,255,255,.65));
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            text-shadow: 0 18px 45px rgba(0,0,0,.35);
+        }
+
+        nav{
+            display:flex;
+            background: rgba(10,14,26,.50);
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            backdrop-filter: blur(14px);
+        }
+        .tab-btn{
+            flex:1;
+            padding: 14px 12px;
+            background:none;
+            border:none;
+            font-size: 14px;
+            font-weight: 800;
+            cursor:pointer;
+            color: rgba(255,255,255,.65);
+            transition: color var(--t-fast) var(--ease-out);
+            position:relative;
+        }
+        .tab-btn.active{ color: rgba(255,255,255,.94); }
+        .tab-btn.active::after{
+            content:"";
+            position:absolute;
+            left: 18%;
+            bottom: 6px;
+            width: 64%;
+            height: 3px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(124,92,255,1), rgba(255,77,157,1));
+            box-shadow: 0 8px 18px rgba(255,77,157,.22);
+            animation: slideIn var(--t-med) var(--ease-out);
+        }
+        @keyframes slideIn{ from{ transform: scaleX(.4); opacity:.4 } to{ transform: scaleX(1); opacity:1 } }
+
+        .tab-content{
+            display:none;
+            padding: 18px;
+            opacity:0;
+            transform: translateY(8px);
+            transition: opacity var(--t-med) var(--ease-out), transform var(--t-med) var(--ease-out);
+        }
+        .tab-content.active{
+            display:block;
+            opacity:1;
+            transform: translateY(0);
+        }
+
+        /* Chips / categories */
+        .category-filter{
+            display:flex;
+            gap: 10px;
+            overflow-x:auto;
+            padding-bottom: 14px;
+            margin-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .category-filter::-webkit-scrollbar{ display:none; }
+
+        .cat-btn{
+            white-space:nowrap;
+            padding: 9px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+            color: rgba(255,255,255,.80);
+            font-weight: 800;
+            font-size: 12px;
+            cursor:pointer;
+            transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
+            backdrop-filter: blur(10px);
+        }
+        .cat-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.18); }
+        .cat-btn:active{ transform: translateY(0) scale(.99); }
+        .cat-btn.active{
+            background: linear-gradient(135deg, rgba(124,92,255,.35), rgba(56,189,248,.18));
+            border-color: rgba(124,92,255,.55);
+            color: white;
+            box-shadow: 0 12px 26px rgba(124,92,255,.20);
+        }
+
+        /* Products grid */
+        .products-grid{
+            display:grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+        }
+        .product-card{
+            background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.05));
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: var(--r-lg);
+            padding: 18px;
+            text-align:center;
+            box-shadow: var(--shadow-1);
+            position:relative;
+            display:flex;
+            flex-direction:column;
+            overflow:hidden;
+            transform: translateY(0);
+            transition: transform var(--t-med) var(--ease-out), box-shadow var(--t-med) var(--ease-out), border-color var(--t-med) var(--ease-out);
+            animation: cardIn var(--t-slow) var(--ease-out) both;
+        }
+        @keyframes cardIn{
+            from{ opacity:0; transform: translateY(10px) scale(.98); }
+            to{ opacity:1; transform: translateY(0) scale(1); }
+        }
+        .product-card::before{
+            content:"";
+            position:absolute; inset:-40% -30% auto;
+            height: 180px;
+            background: radial-gradient(closest-side, rgba(124,92,255,.28), transparent 70%);
+            pointer-events:none;
+            transform: rotate(10deg);
+            opacity:.8;
+        }
+        .product-card:hover{
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-2);
+            border-color: rgba(255,255,255,.18);
+        }
+
+        .product-image{
+            width:100%;
+            height: 180px;
+            border-radius: 16px;
+            margin-bottom: 14px;
+            background: rgba(255,255,255,.04);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            border: 1px solid rgba(255,255,255,.10);
+        }
+        .product-image img{
+            width:100%;
+            height:100%;
+            object-fit: contain;
+            padding: 6px;
+            filter: drop-shadow(0 14px 26px rgba(0,0,0,.35));
+        }
+
+        .product-name{
+            font-weight: 900;
+            margin-bottom: 8px;
+            color: rgba(255,255,255,.92);
+        }
+        .product-price{
+            color: var(--accent-color);
+            font-weight: 900;
+            font-size: 20px;
+            margin-bottom: 8px;
+            text-shadow: 0 10px 22px rgba(255,77,157,.18);
+        }
+        .product-description{
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 14px;
+            flex-grow:1;
+        }
+
+        .add-to-cart-btn{
+            background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(255,77,157,.88));
+            color: white;
+            border:none;
+            padding: 11px 12px;
+            border-radius: 14px;
+            cursor:pointer;
+            font-weight: 900;
+            transition: transform var(--t-fast) var(--ease-out), filter var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
+            width:100%;
+            box-shadow: 0 14px 32px rgba(124,92,255,.20);
+        }
+        .add-to-cart-btn:hover{ transform: translateY(-1px); filter: saturate(1.07); box-shadow: 0 18px 40px rgba(124,92,255,.26); }
+        .add-to-cart-btn:active{ transform: translateY(0) scale(.99); }
+
+        .qty-control-catalog{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background: linear-gradient(135deg, rgba(251,113,133,.95), rgba(239,68,68,.88));
+            color:white;
+            border-radius: 14px;
+            padding: 8px 10px;
+            width:100%;
+            box-shadow: 0 14px 32px rgba(239,68,68,.18);
+        }
+        .qty-control-catalog button{
+            background:none;
+            border:none;
+            color:white;
+            font-weight: 1000;
+            font-size: 18px;
+            padding: 0 14px;
+            cursor:pointer;
+        }
+        .qty-control-catalog span{ font-weight: 900; }
+        .in-cart-text{ font-size: 11px; text-transform: uppercase; margin-bottom: 2px; opacity:.9; }
+
+        /* Floating buttons */
+        .cart-fab{
+            position: fixed;
+            bottom: 30px;
+            right: 18px;
+            width: 62px;
+            height: 62px;
+            background: linear-gradient(135deg, rgba(255,77,157,1), rgba(124,92,255,1));
+            border-radius: 20px;
+            box-shadow: 0 20px 55px rgba(255,77,157,.18), 0 16px 45px rgba(0,0,0,.35);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-size: 24px;
+            cursor:pointer;
+            z-index: 90;
+            transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
+        }
+        .cart-fab:hover{ transform: translateY(-2px); box-shadow: 0 26px 70px rgba(255,77,157,.22), 0 18px 55px rgba(0,0,0,.38); }
+        .cart-fab:active{ transform: translateY(0) scale(.98); }
+
+        .cart-badge{
+            position:absolute;
+            top: -8px;
+            right: -8px;
+            background: rgba(255,255,255,.92);
+            color: rgba(5,10,18,.95);
+            font-size: 12px;
+            width: 26px;
+            height: 26px;
+            border-radius: 999px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border: 2px solid rgba(10,14,26,.35);
+            box-shadow: 0 10px 22px rgba(0,0,0,.35);
+            font-weight: 900;
+        }
+
+        .admin-fab{
+            position: fixed;
+            bottom: 30px;
+            left: 18px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 20px;
+            box-shadow: 0 18px 45px rgba(0,0,0,.35);
+            display:none;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-size: 24px;
+            cursor:pointer;
+            z-index: 90;
+            backdrop-filter: blur(14px);
+            transition: transform var(--t-fast) var(--ease-out), box-shadow var(--t-fast) var(--ease-out);
+        }
+        .admin-fab:hover{ transform: translateY(-2px); box-shadow: 0 26px 60px rgba(0,0,0,.45); }
+        .admin-fab:active{ transform: translateY(0) scale(.98); }
+
+        /* Modal */
+        .modal{
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,.55);
+            z-index: 1000;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity var(--t-med) var(--ease-out), visibility var(--t-med) var(--ease-out);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding: 18px 0;
+        }
+        .modal.active{
+            opacity:1;
+            visibility: visible;
+            pointer-events:auto;
+        }
+
+        .modal-content{
+            background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.06));
+            border: 1px solid rgba(255,255,255,.14);
+            padding: 22px;
+            border-radius: 22px;
+            width: 92%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-2);
+            position: relative;
+            transform: translateY(12px) scale(.98);
+            opacity: .98;
+            transition: transform var(--t-med) var(--ease-out);
+            backdrop-filter: blur(16px);
+        }
+        .modal.active .modal-content{ transform: translateY(0) scale(1); }
+
+        .close-btn{
+            position:absolute;
+            top: 12px;
+            right: 14px;
+            width: 38px;
+            height: 38px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius: 14px;
+            color: rgba(255,255,255,.78);
+            cursor:pointer;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.12);
+            transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+            font-size: 22px;
+        }
+        .close-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+        .close-btn:active{ transform: translateY(0) scale(.98); }
+
+        h2,h3,h4{
+            color: rgba(255,255,255,.92);
+            letter-spacing: .2px;
+        }
+        h2{ font-size: 20px; margin-bottom: 12px; }
+        h3{ font-size: 18px; margin-bottom: 10px; }
+        h4{ font-size: 15px; margin-bottom: 8px; color: rgba(255,255,255,.88); }
+
+        /* Cart */
+        .cart-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,.10);
+        }
+        .cart-item-info{ flex:1; text-align:left; }
+        .cart-item-title{ font-weight: 900; font-size: 15px; color: rgba(255,255,255,.92); }
+        .cart-item-price{ color: var(--accent-color); font-weight: 900; opacity: .95; }
+        .cart-controls{ display:flex; align-items:center; gap: 10px; color: rgba(255,255,255,.90); font-weight: 900; }
+        .qty-btn{
+            width: 34px;
+            height: 34px;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,.14);
+            background: rgba(255,255,255,.06);
+            cursor:pointer;
+            font-size: 16px;
+            color: rgba(255,255,255,.92);
+            transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+        }
+        .qty-btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.10); }
+        .qty-btn:active{ transform: translateY(0) scale(.98); }
+
+        .cart-total{
+            margin-top: 18px;
+            font-size: 18px;
+            font-weight: 900;
+            display:flex;
+            justify-content:space-between;
+            border-top: 1px solid rgba(255,255,255,.16);
+            padding-top: 12px;
+            color: rgba(255,255,255,.92);
+        }
+
+        .loading{ text-align:center; padding: 22px; color: var(--muted); }
+        .out-of-stock{
+            background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.55);
+            padding: 10px;
+            border-radius: 14px;
+            width: 100%;
+            font-weight: 900;
+            cursor: not-allowed;
+            border: 1px solid rgba(255,255,255,.12);
+        }
+
+        /* Admin */
+        .admin-tabs{
+            display:flex;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,.10);
+            gap: 8px;
+        }
+        .admin-tab{
+            flex:1;
+            padding: 10px 8px;
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 14px 14px 0 0;
+            font-weight: 900;
+            color: rgba(255,255,255,.66);
+            cursor:pointer;
+            transition: background var(--t-fast) var(--ease-out), color var(--t-fast) var(--ease-out), transform var(--t-fast) var(--ease-out);
+        }
+        .admin-tab:hover{ background: rgba(255,255,255,.07); transform: translateY(-1px); }
+        .admin-tab.active{
+            color: rgba(255,255,255,.94);
+            background: linear-gradient(135deg, rgba(124,92,255,.25), rgba(56,189,248,.10));
+            border-color: rgba(124,92,255,.35);
+        }
+        .admin-tab-content{ display:none; }
+        .admin-tab-content.active{ display:block; }
+
+        .stat-card{
+            background: rgba(255,255,255,.06);
+            padding: 16px;
+            border-radius: 18px;
+            margin-bottom: 14px;
+            border: 1px solid rgba(255,255,255,.12);
+        }
+        .stat-row{
+            display:flex;
+            justify-content:space-between;
+            margin-bottom: 6px;
+            font-size: 15px;
+            color: rgba(255,255,255,.86);
+        }
+        .stat-profit{
+            font-size: 22px;
+            font-weight: 1000;
+            color: var(--green-color);
+            margin-top: 10px;
+            border-top: 1px solid rgba(255,255,255,.12);
+            padding-top: 10px;
+            text-shadow: 0 14px 30px rgba(34,197,94,.18);
+        }
+        .expense-list{ max-height: 160px; overflow-y:auto; margin-top: 10px; font-size: 13px; color: var(--muted); }
+        .expense-item{ padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+        .expense-date{ font-size: 11px; color: rgba(255,255,255,.50); margin-right: 5px; }
+
+        .order-admin-card{
+            background: rgba(255,255,255,.05);
+            padding: 14px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,.10);
+            box-shadow: 0 14px 35px rgba(0,0,0,.22);
+        }
+
+        .delete-prod-btn{
+            background: linear-gradient(135deg, rgba(251,113,133,1), rgba(239,68,68,1));
+            color:white;
+            border:none;
+            padding: 7px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-top: 6px;
+            cursor:pointer;
+            font-weight: 900;
+            box-shadow: 0 14px 30px rgba(239,68,68,.14);
+            transition: transform var(--t-fast) var(--ease-out);
+        }
+        .delete-prod-btn:hover{ transform: translateY(-1px); }
+        .delete-prod-btn:active{ transform: translateY(0) scale(.99); }
+
+        /* Edit order */
+        .edit-order-item{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            padding: 10px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 16px;
+            margin-bottom: 8px;
+        }
+        .edit-controls{ display:flex; align-items:center; gap: 8px; }
+        .edit-btn-small{
+            width: 26px;
+            height: 26px;
+            border:none;
+            background: rgba(255,255,255,.12);
+            border-radius: 10px;
+            font-weight: 1000;
+            cursor:pointer;
+            color: rgba(255,255,255,.92);
+            transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out);
+        }
+        .edit-btn-small:hover{ transform: translateY(-1px); background: rgba(255,255,255,.16); }
+        .edit-btn-small:active{ transform: translateY(0) scale(.98); }
+
+        .prod-select-wrapper{ display:flex; gap: 10px; margin-bottom: 15px; }
+        .prod-select-wrapper select{ flex:1; padding: 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); color: rgba(255,255,255,.92); }
+
+        /* Stock control */
+        .stock-control{ display:flex; align-items:center; gap: 6px; margin-top: 6px; }
+        .stock-input{
+            width: 70px;
+            padding: 6px 8px;
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 12px;
+            background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.92);
+        }
+
+        /* DB table */
+        .db-table-container{
+            overflow-x:auto;
+            margin-top: 10px;
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.10);
+            border-radius: 18px;
+            padding: 8px;
+        }
+        .db-table{
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            color: rgba(255,255,255,.82);
+        }
+        .db-table th,.db-table td{
+            padding: 10px 8px;
+            border: 1px solid rgba(255,255,255,.10);
+            text-align:left;
+            white-space: nowrap;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .db-table th{
+            background: rgba(255,255,255,.06);
+            color: rgba(255,255,255,.92);
+            font-weight: 900;
+        }
+        .db-action-btn{
+            border:none;
+            background:none;
+            cursor:pointer;
+            font-size: 16px;
+            margin-right: 6px;
+            filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
+        }
+
+        /* Photo wizard */
+        .wiz-card{
+            border: 1px dashed rgba(255,255,255,.22);
+            border-radius: 18px;
+            padding: 14px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            background: rgba(255,255,255,.05);
+            cursor:pointer;
+            transition: transform var(--t-fast) var(--ease-out), background var(--t-fast) var(--ease-out), border-color var(--t-fast) var(--ease-out);
+            position: relative;
+            overflow:hidden;
+        }
+        .wiz-card:hover{ transform: translateY(-2px); background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.30); }
+        .wiz-card:active{ transform: translateY(0) scale(.99); }
+        .wiz-img{
+            width: 100%;
+            height: 120px;
+            background: rgba(255,255,255,.04);
+            border-radius: 16px;
+            margin-bottom: 10px;
+            overflow:hidden;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border: 1px solid rgba(255,255,255,.10);
+        }
+        .wiz-img img{ width:100%; height:100%; object-fit: cover; }
+        .wiz-overlay{
+            position:absolute; inset:0;
+            background: rgba(0,0,0,.55);
+            color:white;
+            display:none;
+            align-items:center;
+            justify-content:center;
+            border-radius: 18px;
+            font-weight: 1000;
+            font-size: 16px;
+            backdrop-filter: blur(6px);
+        }
+        .wiz-card.uploading .wiz-overlay{ display:flex; }
+
+        /* Bonus card legacy blocks (kept for compatibility if referenced) */
+        .bonus-card{
+            background: linear-gradient(135deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
+            border-radius: 22px;
+            padding: 26px;
+            text-align:center;
+            box-shadow: var(--shadow-1);
+            border: 1px solid rgba(255,255,255,.12);
+        }
+        .qr-container{
+            background: rgba(255,255,255,.06);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255,255,255,.12);
+        }
+        #qr-code{ width:220px; height:220px; margin:0 auto; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,.06); border-radius: 16px; border: 1px solid rgba(255,255,255,.12); }
+        #qr-code canvas{ max-width:100%; max-height:100%; }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce){
+            *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+        }
+
+        /* Small screens tuning */
+        @media (max-width: 420px){
+            .container{ margin: 36px auto; }
+            .products-grid{ grid-template-columns: 1fr; }
+            header{ padding: 12px 14px; }
+            .modal-content{ width: 94%; padding: 18px; border-radius: 20px; }
+        }
+</style>
+</head>
+<body>
+    <div id="registration-screen" class="screen active">
+        <div class="container">
+            <div class="welcome-logo"><div class="logo-icon">✈️💨</div><h1>TripPuff</h1></div>
+            <p class="welcome-text">Получайте бонусы за покупки!</p>
+            <div class="form-group"><label>Имя</label><input type="text" id="name" required></div>
+            <div class="form-group"><label>Номер телефона</label><div class="phone-input-wrapper"><span class="phone-prefix">+7</span><input type="tel" id="phone" placeholder="(900) 000-00-00" maxlength="10"></div></div>
+            <button class="btn-primary" onclick="registerUser()">Продолжить</button>
+        </div>
+    </div>
+    <div id="main-screen" class="screen">
+        <header><div></div><div class="logo">TripPuff</div><div class="help-icon" onclick="openFAQ()">?</div></header>
+        <nav><button class="tab-btn active" onclick="switchTab('bonus')">Бонусная карта</button><button class="tab-btn" onclick="switchTab('catalog')">Каталог</button></nav>
+        <div id="bonus-tab" class="tab-content active">
+            <div class="bonus-card"><h2>Ваша бонусная карта</h2><div class="qr-container"><div id="qr-code"></div></div><div class="user-info"><h3 id="user-name"></h3><p id="user-phone"></p><p style="color:var(--secondary-color)">Код: <span id="referral-code"></span></p></div><div class="points"><span style="color:var(--secondary-color)">Баллов:</span><span class="points-value" id="points-count">0</span></div></div>
+        </div>
+        <div id="catalog-tab" class="tab-content">
+            <div class="search-bar"><input type="text" id="search-input" placeholder="Поиск товаров..." oninput="filterProducts()"></div>
+            <div class="category-filter" id="category-filter">
+                <button class="cat-btn active" onclick="setCategory('all')">Все</button><button class="cat-btn" onclick="setCategory('Жидкости')">Жидкости</button><button class="cat-btn" onclick="setCategory('Одноразки')">Одноразки</button><button class="cat-btn" onclick="setCategory('Снюс')">Снюс</button><button class="cat-btn" onclick="setCategory('POD-системы')">POD-системы</button><button class="cat-btn" onclick="setCategory('Картриджи')">Картриджи</button>
+            </div>
+            <div id="products-container" class="products-grid"><div class="loading">Загрузка товаров...</div></div>
+        </div>
+        <div id="admin-fab" class="admin-fab" onclick="openAdminPanel()">🤖</div>
+        <div class="cart-fab" onclick="openCart()">🛒<div id="cart-badge" class="cart-badge" style="display:none">0</div></div>
+    </div>
+    <!-- MODALS -->
+    <div id="faq-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('faq-modal')">&times;</span><h2>Часто задаваемые вопросы</h2><div id="faq-content"></div></div></div>
+    <div id="cart-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('cart-modal')">&times;</span><h2>Корзина</h2><div id="cart-items-container"></div><div class="cart-total"><span>Итого:</span><span id="cart-total-price">0 ₽</span></div><button class="btn-primary" onclick="startCheckout()" style="margin-top:20px;">Оформить заказ</button></div></div>
+    <div id="age-warning-modal" class="modal"><div class="modal-content" style="text-align: center;"><div style="font-size: 40px; margin-bottom: 10px;">🔞</div><h2>Внимание!</h2><p>Учитывайте, что если ваш возраст меньше 18 лет - курьер в праве отказать вам в выдаче товара.</p><button class="btn-primary" onclick="showAddressForm()">Всё понятно, мне есть 18</button><button class="btn-primary btn-danger" onclick="closeModal('age-warning-modal')" style="margin-top: 10px; background: #999;">Отмена</button></div></div>
+    <div id="address-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('address-modal')">&times;</span><h2>Оформление</h2><div class="form-group"><label>Адрес доставки</label><textarea id="delivery-address" rows="3"></textarea></div><div class="form-group"><label>Комментарий</label><textarea id="order-comment" rows="2"></textarea></div><button class="btn-primary" onclick="submitOrder()">Подтвердить заказ</button></div></div>
+    
+    <!-- ADMIN MODAL -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
+            <h2>Админ-панель</h2>
+            
+            <div class="admin-tabs">
+                <button class="admin-tab active" onclick="switchAdminTab('stats')">📊 Стат</button>
+                <button class="admin-tab" onclick="switchAdminTab('orders')">📦 Заказы</button>
+                <button class="admin-tab" onclick="switchAdminTab('products')">➕ Товар</button>
+                <button class="admin-tab" onclick="switchAdminTab('db')">💾 БД</button>
+            </div>
+
+            <!-- TAB 1: STATS -->
+            <div id="admin-stats-tab" class="admin-tab-content active">
+                <div id="admin-stats-container"></div>
+                <h3 style="margin-top:15px">Расход</h3>
+                <input type="number" id="expense-amount" placeholder="Сумма" style="width:100%; padding:10px; margin-bottom:5px;">
+                <input type="text" id="expense-comment" placeholder="Комментарий" style="width:100%; padding:10px; margin-bottom:5px;">
+                <button class="btn-primary btn-danger" onclick="addExpense()">Добавить</button>
+            </div>
+
+            <!-- TAB 2: ORDERS -->
+            <div id="admin-orders-tab" class="admin-tab-content">
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <button class="cat-btn active" onclick="loadAdminOrders('active')" id="btn-ord-active">Активные</button>
+                    <button class="cat-btn" onclick="loadAdminOrders('completed')" id="btn-ord-comp">Архив</button>
+                </div>
+                <div id="admin-orders-list"></div>
+            </div>
+
+            <!-- TAB 3: PRODUCTS -->
+            <div id="admin-products-tab" class="admin-tab-content">
+                
+                <!-- IMPORT BLOCK -->
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c8e6c9;">
+                    <h4 style="margin-bottom:10px">🚀 Импорт и Фото</h4>
+                    <div style="display:flex; gap:10px;">
+                        <input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="processCsvFile()">
+                        <button class="btn-primary btn-green" style="margin:0; font-size:14px;" onclick="document.getElementById('csv-file-input').click()">📥 1. Импорт Excel</button>
+                        <button class="btn-primary btn-blue" style="margin:0; font-size:14px;" onclick="openPhotoWizard()">📸 2. Мастер Фото</button>
+                    </div>
+                    <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                        CSV: Категория; Название; Описание; Закуп; Продажа; Кол-во
+                    </p>
+                </div>
+
+                <h3>Добавить товар (вручную)</h3>
+                <div class="form-group">
+                    <select id="new-prod-cat">
+                        <option value="Жидкости">Жидкости</option>
+                        <option value="Одноразки">Одноразки</option>
+                        <option value="Снюс">Снюс</option>
+                        <option value="POD-системы">POD-системы</option>
+                        <option value="Картриджи">Картриджи</option>
+                    </select>
+                </div>
+                <div class="form-group"><input type="text" id="new-prod-name" placeholder="Название"></div>
+                <div class="form-group"><textarea id="new-prod-desc" placeholder="Описание"></textarea></div>
+                <div style="display:flex; gap:10px;">
+                    <div class="form-group"><input type="number" id="new-prod-buy" placeholder="Закуп (₽)"></div>
+                    <div class="form-group"><input type="number" id="new-prod-sell" placeholder="Продажа (₽)"></div>
+                </div>
+                <div class="form-group"><input type="number" id="new-prod-stock" placeholder="Кол-во (шт)"></div>
+                <div class="form-group"><label>Фото</label><input type="file" id="new-prod-file" accept="image/*"></div>
+                <button class="btn-primary btn-green" onclick="addNewProduct()">Создать товар</button>
+                
+                <h3 style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px;">Управление товарами</h3>
+                <div id="admin-products-list"></div>
+            </div>
+
+            <!-- TAB 4: DATABASE MANAGER -->
+            <div id="admin-db-tab" class="admin-tab-content">
+                <div style="display:flex; gap:10px; margin-bottom:10px; align-items:center;">
+                    <select id="db-table-select" style="flex:1" onchange="loadDbTable()">
+                        <option value="users">Users (Клиенты)</option>
+                        <option value="faq">FAQ</option>
+                        <option value="expenses">Expenses (Расходы)</option>
+                        <option value="products">Products (Товары)</option>
+                    </select>
+                    <button class="btn-primary btn-green" style="width: auto; margin:0; padding:10px;" onclick="openCreateRecordModal()">➕</button>
+                </div>
+                <div id="db-view-container" class="db-table-container">Загрузка...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN EDIT ORDER MODAL -->
+    <div id="edit-order-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('edit-order-modal').classList.remove('active')">&times;</span>
+            <h3>Редактировать заказ #<span id="edit-order-id-display"></span></h3>
+            <input type="hidden" id="edit-order-id">
+            
+            <label>Добавить товар в заказ:</label>
+            <div class="prod-select-wrapper">
+                <select id="edit-order-add-select"></select>
+                <button class="btn-primary btn-green" style="width: auto; margin: 0; padding: 0 15px;" onclick="addProdToEditOrder()">+</button>
+            </div>
+
+            <div id="edit-order-items-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
+
+            <div class="form-group" style="display: flex; gap: 10px; align-items: flex-end;">
+                <div style="flex: 1;">
+                    <label>Скидка (%)</label>
+                    <input type="number" id="edit-order-discount" value="0" min="0" max="100" oninput="recalcEditTotal()">
+                </div>
+                <div style="flex: 1; text-align: right; font-weight: bold; font-size: 18px; padding-bottom: 10px;">
+                    Итого: <span id="edit-order-total">0</span> ₽
+                </div>
+            </div>
+
+            <div class="form-group"><label>Адрес</label><textarea id="edit-order-address" rows="2"></textarea></div>
+            <div class="form-group"><label>Комментарий</label><textarea id="edit-order-comment" rows="2"></textarea></div>
+            
+            <button class="btn-primary" onclick="saveOrderChanges()">Сохранить изменения</button>
+        </div>
+    </div>
+
+    <!-- DB EDIT MODAL -->
+    <div id="db-edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('db-edit-modal').classList.remove('active')">&times;</span>
+            <h3 id="db-edit-title">Редактирование</h3>
+            <div id="db-edit-fields"></div>
+            <button class="btn-primary" onclick="saveDbRecord()">Сохранить</button>
+        </div>
+    </div>
+
+    <!-- PHOTO WIZARD MODAL -->
+    <div id="photo-wizard-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="document.getElementById('photo-wizard-modal').classList.remove('active')">&times;</span>
+            <h3>📸 Мастер Фото</h3>
+            <p style="font-size:14px; color:#666; margin-bottom:15px;">Нажмите на карточку, чтобы добавить фото. Оно сохранится автоматически.</p>
+            
+            <input type="file" id="wiz-file-input" accept="image/*" style="display:none">
+            <div id="wiz-grid" class="products-grid"></div>
+        </div>
+    </div>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script>
+        const API_URL = 'https://ytiiiipuff-production.up.railway.app'; 
+        let userData = null, products = [], cart = [], currentCategory = 'all';
+        let currentEditItems = []; 
+        let currentDbTable = '', currentDbId = null;
+
+        const phoneInput = document.getElementById('phone');
+        phoneInput.addEventListener('input', function(e) { this.value = this.value.replace(/\D/g, ''); });
+
+        async function initApp() {
+            try {
+                const initData = Telegram.WebApp.initDataUnsafe;
+                const userId = initData?.user?.id;
+                // const userId = 123456789; // Debug
+                if (!userId) { alert('Откройте в Telegram!'); return; }
+                Telegram.WebApp.expand(); Telegram.WebApp.setHeaderColor('#e0e0e0');
+                userData = await checkUserRegistration(userId);
+                if (userData) { showMainScreen(); loadBonusTab(); await fetchCart(); if (userData.is_admin) document.getElementById('admin-fab').style.display = 'flex'; } 
+                else showRegistrationScreen();
+            } catch (error) { console.error(error); }
+        }
+        async function checkUserRegistration(userId) { try { const res = await fetch(`${API_URL}/api/user/${userId}`); if (res.ok) return await res.json(); } catch (e) {} return null; }
+        function showRegistrationScreen() { document.getElementById('registration-screen').classList.add('active'); }
+        function showMainScreen() { document.getElementById('registration-screen').classList.remove('active'); document.getElementById('main-screen').classList.add('active'); }
+        async function registerUser() {
+            const name = document.getElementById('name').value;
+            let phoneVal = document.getElementById('phone').value;
+            if (!name) return alert('Введите имя');
+            if (phoneVal.length !== 10) return alert('Номер должен содержать 10 цифр');
+            const fullPhone = '+7' + phoneVal; 
+            const tgUser = Telegram.WebApp.initDataUnsafe?.user;
+            const res = await fetch(`${API_URL}/api/register`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: tgUser.id, name, phone: fullPhone, username: tgUser.username || '' }) });
+            const data = await res.json();
+            if (data.success) { userData = data.user; showMainScreen(); loadBonusTab(); } else alert(data.message);
+        }
+        function switchTab(tab) { document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(`${tab}-tab`).classList.add('active'); event.target.classList.add('active'); if (tab === 'catalog') loadCatalog(); }
+        function loadBonusTab() { if (!userData) return; document.getElementById('user-name').textContent = userData.name; document.getElementById('user-phone').textContent = userData.phone; document.getElementById('points-count').textContent = userData.points || 0; document.getElementById('referral-code').textContent = userData.referral_code; const qrContainer = document.getElementById('qr-code'); qrContainer.innerHTML = ''; new QRCode(qrContainer, { text: `user:${userData.referral_code}`, width: 200, height: 200 }); }
+        async function fetchCart() { if (!userData) return; try { const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`); cart = await res.json(); updateCartBadge(); if (document.getElementById('catalog-tab').classList.contains('active')) filterProducts(); } catch (e) {} }
+        async function loadCatalog() { const container = document.getElementById('products-container'); if (cart.length === 0) await fetchCart(); if (products.length === 0) { try { const res = await fetch(`${API_URL}/api/products`); products = await res.json(); displayProducts(products); } catch (e) { container.innerHTML = '<p>Ошибка</p>'; } } else displayProducts(products); }
+        function setCategory(cat) { currentCategory = cat; document.querySelectorAll('.cat-btn').forEach(btn => { btn.classList.remove('active'); if (btn.textContent === cat || (cat === 'all' && btn.textContent === 'Все')) btn.classList.add('active'); }); filterProducts(); }
+        function filterProducts() { 
+            const term = document.getElementById('search-input').value.toLowerCase(); 
+            const filtered = products.filter(p => { 
+                const matchesSearch = p.name.toLowerCase().includes(term); 
+                const matchesCategory = currentCategory === 'all' || p.category === currentCategory; 
+                // СКРЫВАЕМ ПУСТЫЕ ТОВАРЫ ОТ НЕ-АДМИНОВ
+                const isVisible = p.stock > 0 || (userData && userData.is_admin);
+                return matchesSearch && matchesCategory && isVisible; 
+            }); 
+            displayProducts(filtered); 
+        }
+        function displayProducts(list) { const container = document.getElementById('products-container'); container.innerHTML = ''; if (list.length === 0) { container.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Пусто</div>'; return; } list.forEach(p => { const cartItem = cart.find(c => c.product_id === p.id); const hasStock = p.stock > 0; let buttonHtml = ''; if (!hasStock) buttonHtml = `<div class="out-of-stock">Нет в наличии</div>`; else if (cartItem) { buttonHtml = `<div class="qty-control-catalog"><button onclick="changeQtyFromCatalog(${p.id}, -1)">-</button><div style="text-align:center"><div class="in-cart-text">В корзине</div><span>${cartItem.quantity}</span></div><button onclick="changeQtyFromCatalog(${p.id}, 1)">+</button></div>`; } else buttonHtml = `<button class="add-to-cart-btn" onclick="addToCart(${p.id})">В корзину +</button>`; const el = document.createElement('div'); el.className = 'product-card'; el.innerHTML = `<div class="product-image">${p.image_url ? `<img src="${p.image_url}">` : 'Фото'}</div><div class="product-name">${p.name}</div><div class="product-price">${p.price} ₽</div><div class="product-description">${p.description}</div>${buttonHtml}`; container.appendChild(el); }); }
+        function updateCartBadge() { const count = cart.reduce((sum, item) => sum + item.quantity, 0); const badge = document.getElementById('cart-badge'); if (count > 0) { badge.style.display = 'flex'; badge.textContent = count; } else badge.style.display = 'none'; }
+        async function addToCart(id) { Telegram.WebApp.HapticFeedback.impactOccurred('light'); try { await fetch(`${API_URL}/api/cart/add`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id }) }); await fetchCart(); } catch (e) {} }
+        async function changeQtyFromCatalog(id, chg) { if (chg === 1) await addToCart(id); else await removeFromCart(id); }
+        async function removeFromCart(id, all = false) { try { await fetch(`${API_URL}/api/cart/remove`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id, removeAll: all }) }); await fetchCart(); if (document.getElementById('cart-modal').classList.contains('active')) openCart(); } catch (e) {} }
+        async function openCart() { await fetchCart(); document.getElementById('cart-modal').classList.add('active'); const container = document.getElementById('cart-items-container'); const totalEl = document.getElementById('cart-total-price'); container.innerHTML = ''; let total = 0; if (cart.length === 0) { container.innerHTML = '<p>Пусто</p>'; totalEl.textContent = '0 ₽'; } else { cart.forEach(i => { const sum = i.price * i.quantity; total += sum; container.innerHTML += `<div class="cart-item"><div class="cart-item-info"><div class="cart-item-title">${i.name}</div><div class="cart-item-price">${i.price} x ${i.quantity} = ${sum}</div></div><div class="cart-controls"><button class="qty-btn" onclick="removeFromCart(${i.product_id})">-</button><span>${i.quantity}</span><button class="qty-btn" onclick="addToCart(${i.product_id})">+</button></div></div>`; }); totalEl.textContent = total.toFixed(2) + ' ₽'; } }
+        function startCheckout() { if (cart.length === 0) return alert('Пусто'); document.getElementById('cart-modal').classList.remove('active'); document.getElementById('age-warning-modal').classList.add('active'); }
+        function showAddressForm() { document.getElementById('age-warning-modal').classList.remove('active'); document.getElementById('address-modal').classList.add('active'); }
+        async function submitOrder() { const addr = document.getElementById('delivery-address').value; if (!addr) return alert('Укажите адрес'); try { const res = await fetch(`${API_URL}/api/order`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, address: addr, comment: document.getElementById('order-comment').value }) }); if ((await res.json()).success) { alert('Заказ оформлен!'); document.getElementById('address-modal').classList.remove('active'); await fetchCart(); } } catch (e) {} }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        async function openFAQ() { document.getElementById('faq-modal').classList.add('active'); const res = await fetch(`${API_URL}/api/faq`); document.getElementById('faq-content').innerHTML = (await res.json()).map(i => `<div><h3>${i.question}</h3><p>${i.answer}</p></div>`).join(''); }
+
+        // --- ADMIN LOGIC ---
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(`admin-${tab}-tab`).classList.add('active');
+            if (tab === 'orders') loadAdminOrders('active');
+            if (tab === 'products') loadAdminProducts();
+            if (tab === 'db') loadDbTable();
+        }
+
+        async function openAdminPanel() {
+            document.getElementById('admin-modal').classList.add('active');
+            const container = document.getElementById('admin-stats-container');
+            container.innerHTML = 'Загрузка...';
+            try {
+                const res = await fetch(`${API_URL}/api/admin/stats?userId=${userData.telegram_id}`);
+                const data = await res.json();
+                let expList = data.expensesList.map(e => {
+                    const d = new Date(e.created_at).toLocaleDateString('ru-RU', {day:'numeric', month:'numeric', hour:'2-digit', minute:'2-digit'});
+                    return `<div class="expense-item"><span class="expense-date">[${d}]</span> - ${e.amount}₽ (${e.comment})</div>`;
+                }).join('');
+                container.innerHTML = `<div class="stat-card"><div class="stat-row"><span>Продажи:</span><span>+${data.revenue} ₽</span></div><div class="stat-row"><span>Закупка:</span><span>-${data.cogs} ₽</span></div><div class="stat-row"><span>Доп. расходы:</span><span>-${data.expenses} ₽</span></div><div class="stat-profit">Чистая прибыль: ${data.netProfit} ₽</div></div><div class="expense-list">${expList || 'Нет расходов'}</div>`;
+            } catch (e) { container.innerHTML = 'Ошибка'; }
+        }
+
+        async function addExpense() {
+            const amt = document.getElementById('expense-amount').value;
+            const cmt = document.getElementById('expense-comment').value;
+            if(!amt) return;
+            await fetch(`${API_URL}/api/admin/expense`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, amount: amt, comment: cmt }) });
+            document.getElementById('expense-amount').value = ''; document.getElementById('expense-comment').value = '';
+            openAdminPanel();
+        }
+
+        // PRODUCTS MANAGEMENT (CSV & MANUAL)
+        function processCsvFile() {
+            const fileInput = document.getElementById('csv-file-input');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const text = e.target.result;
+                const rows = text.split('\n');
+                
+                const productsToUpload = [];
+
+                rows.forEach((row, index) => {
+                    if (!row.trim()) return;
+                    let cols = row.split(';'); 
+                    if (cols.length < 2) cols = row.split(',');
+
+                    if (cols.length < 5) return; 
+
+                    const clean = (val) => val ? val.trim().replace(/^"|"$/g, '') : '';
+                    if (index === 0 && (cols[0].toLowerCase().includes('кат') || cols[0].toLowerCase().includes('cat'))) return;
+
+                    productsToUpload.push({
+                        category: clean(cols[0]) || 'Разное',
+                        name: clean(cols[1]),
+                        description: clean(cols[2]),
+                        purchase_price: parseFloat(clean(cols[3]).replace(',', '.')) || 0,
+                        price: parseFloat(clean(cols[4]).replace(',', '.')) || 0,
+                        stock: parseInt(clean(cols[5])) || 0
+                    });
+                });
+
+                if (productsToUpload.length === 0) return alert('Файл пуст или неверный формат');
+                if (!confirm(`Найдено ${productsToUpload.length} товаров. Загрузить?`)) { fileInput.value = ''; return; }
+
+                try {
+                    const res = await fetch(`${API_URL}/api/admin/products/batch`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: userData.telegram_id, products: productsToUpload })
+                    });
+                    const data = await res.json();
+                    if (data.success) { alert(`Успешно загружено: ${data.count} шт.`); loadAdminProducts(); } 
+                    else { alert('Ошибка загрузки'); }
+                } catch (e) { alert('Ошибка сети'); }
+                fileInput.value = '';
+            };
+            reader.readAsText(file, 'utf-8'); 
+        }
+
+        // --- NEW PHOTO WIZARD LOGIC ---
+        let wizActiveId = null;
+
+        function openPhotoWizard() {
+            const noPhotoProds = products.filter(p => !p.image_url || p.image_url.includes('placeholder'));
+            const container = document.getElementById('wiz-grid');
+            
+            if (noPhotoProds.length === 0) {
+                alert('Все товары уже с фото! 🎉');
+                return;
+            }
+
+            container.innerHTML = noPhotoProds.map(p => `
+                <div class="wiz-card" id="wiz-card-${p.id}" onclick="triggerWizUpload(${p.id})">
+                    <div class="wiz-img"><img src="${p.image_url || ''}" id="wiz-img-${p.id}"></div>
+                    <div style="font-weight:bold; font-size:14px;">${p.name}</div>
+                    <div style="font-size:12px; color:#666;">${p.price} ₽</div>
+                    <div class="wiz-overlay" id="wiz-over-${p.id}">Загрузка...</div>
+                </div>
+            `).join('');
+
+            document.getElementById('photo-wizard-modal').classList.add('active');
+        }
+
+        function triggerWizUpload(id) {
+            wizActiveId = id;
+            document.getElementById('wiz-file-input').click();
+        }
+
+        document.getElementById('wiz-file-input').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file || !wizActiveId) return;
+
+            const card = document.getElementById(`wiz-card-${wizActiveId}`);
+            card.classList.add('uploading');
+
+            const formData = new FormData();
+            formData.append('userId', userData.telegram_id);
+            formData.append('photo', file);
+
+            try {
+                const res = await fetch(`${API_URL}/api/admin/product/${wizActiveId}/image`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    const img = document.getElementById(`wiz-img-${wizActiveId}`);
+                    img.src = data.imageUrl;
+                    card.classList.remove('uploading');
+                    const prod = products.find(p => p.id === wizActiveId);
+                    if (prod) prod.image_url = data.imageUrl;
+                } else {
+                    alert('Ошибка загрузки');
+                    card.classList.remove('uploading');
+                }
+            } catch(e) {
+                alert('Ошибка сети');
+                card.classList.remove('uploading');
+            }
+            this.value = '';
+        });
+
+
+        async function addNewProduct() {
+            const formData = new FormData();
+            formData.append('userId', userData.telegram_id);
+            formData.append('category', document.getElementById('new-prod-cat').value);
+            formData.append('name', document.getElementById('new-prod-name').value);
+            formData.append('description', document.getElementById('new-prod-desc').value);
+            formData.append('purchase_price', document.getElementById('new-prod-buy').value);
+            formData.append('price', document.getElementById('new-prod-sell').value);
+            formData.append('stock', document.getElementById('new-prod-stock').value);
+            formData.append('photo', document.getElementById('new-prod-file').files[0]);
+
+            if (!formData.get('name') || !formData.get('price')) {
+                return alert('Заполните обязательные поля');
+            }
+
+            const btn = event.target; btn.textContent = 'Загрузка...'; btn.disabled = true;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/product`, { method: 'POST', body: formData });
+                if (res.ok) { alert('Товар создан!'); loadAdminProducts(); } else alert('Ошибка');
+            } catch(e) { alert('Ошибка сети'); }
+            btn.textContent = 'Создать товар'; btn.disabled = false;
+        }
+
+        async function loadAdminProducts() {
+            const container = document.getElementById('admin-products-list');
+            container.innerHTML = 'Загрузка...';
+            try {
+                const res = await fetch(`${API_URL}/api/products`);
+                const prods = await res.json();
+                products = prods;
+                container.innerHTML = prods.map(p => `
+                    <div style="border-bottom:1px solid #eee; padding:10px 0;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div>
+                                <b>${p.name}</b> (${p.category})<br>
+                                <span style="color:${p.stock > 0 ? 'green' : 'red'}">Сток: ${p.stock} шт.</span>
+                            </div>
+                            <button class="delete-prod-btn" onclick="deleteProduct(${p.id})">Удалить</button>
+                        </div>
+                        <div class="stock-control">
+                            <input type="number" id="stock-val-${p.id}" class="stock-input" placeholder="Кол-во">
+                            <button class="cat-btn" style="padding: 4px 8px; background: #e0e0e0;" onclick="updateProdStock(${p.id}, 1)">+ Добавить</button>
+                            <button class="cat-btn" style="padding: 4px 8px; background: #e0e0e0;" onclick="updateProdStock(${p.id}, -1)">- Списать</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) { container.innerHTML = 'Ошибка'; }
+        }
+
+        async function updateProdStock(id, direction) {
+            const input = document.getElementById(`stock-val-${id}`);
+            const val = parseInt(input.value);
+            if (!val || val <= 0) return alert('Введите количество');
+            const change = direction * val;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/product/stock`, { 
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ userId: userData.telegram_id, productId: id, change: change })
+                });
+                if (res.ok) { input.value = ''; loadAdminProducts(); } else { alert('Ошибка'); }
+            } catch(e) { alert('Ошибка сети'); }
+        }
+
+        async function deleteProduct(id) {
+            if (event) event.stopPropagation();
+            if(!confirm('Точно удалить этот товар?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/product/${id}`, { 
+                    method: 'DELETE', 
+                    headers: { 'Content-Type': 'application/json', 'user-id': userData.telegram_id.toString() } 
+                });
+                if (res.ok) { await loadAdminProducts(); } 
+                else { const data = await res.json(); alert('Ошибка удаления: ' + (data.error || 'Неизвестно')); }
+            } catch(e) { console.error(e); alert('Ошибка сети. Проверьте соединение.'); }
+        }
+
+        // ORDERS MANAGEMENT
+        async function loadAdminOrders(status) {
+            document.getElementById('btn-ord-active').classList.toggle('active', status === 'active');
+            document.getElementById('btn-ord-comp').classList.toggle('active', status === 'completed');
+            
+            const container = document.getElementById('admin-orders-list');
+            container.innerHTML = 'Загрузка...';
+            try {
+                const res = await fetch(`${API_URL}/api/admin/orders?userId=${userData.telegram_id}&status=${status}`);
+                const orders = await res.json();
+                
+                if(orders.length === 0) { container.innerHTML = 'Нет заказов'; return; }
+
+                container.innerHTML = orders.map(o => {
+                    const items = o.items.map(i => `${i.name} x${i.quantity}`).join(', ');
+                    const date = new Date(o.created_at).toLocaleDateString('ru-RU');
+                    
+                    let buttons = '';
+                    if (status === 'active') {
+                        const itemsJson = encodeURIComponent(JSON.stringify(o.items));
+                        buttons = `
+                            <button class="btn-primary btn-danger" style="margin-top: 5px; padding: 8px;" 
+                                onclick="editOrder(${o.id}, '${o.address.replace(/\n/g,' ')}', '${(o.comment||'').replace(/\n/g,' ')}', '${itemsJson}', ${o.total_price})">
+                                Редактировать
+                            </button>
+                            <button class="btn-green" style="margin-top:5px; padding:10px; width:100%; border:none; border-radius:5px; color:white; font-weight:bold; cursor:pointer;" onclick="completeOrder(${o.id})">✅ Выполнено</button>
+                        `;
+                    }
+
+                    return `
+                        <div class="order-admin-card">
+                            <div style="font-weight:bold; font-size:16px;">Заказ #${o.id} <span style="font-weight:normal; font-size:12px; color:#888;">${date}</span></div>
+                            <div style="margin-top:5px;"><b>Клиент:</b> ${o.user_data?.name} (<a href="https://t.me/${o.user_data?.username}" target="_blank">@${o.user_data?.username}</a>)</div>
+                            <div><b>Тел:</b> ${o.user_data?.phone}</div>
+                            <div style="margin-top:5px; color:#444;">${items}</div>
+                            <div style="margin-top:5px; font-weight:bold;">Итого: ${o.total_price} ₽</div>
+                            <div style="margin-top:5px; background:#fff; padding:5px; border:1px solid #ddd; font-size:14px;">📍 ${o.address}</div>
+                            <div style="margin-top:5px; font-size:13px; color:#666;">💬 ${o.comment || '-'}</div>
+                            ${buttons}
+                        </div>
+                    `;
+                }).join('');
+            } catch(e) { container.innerHTML = 'Ошибка'; console.error(e); }
+        }
+
+        async function completeOrder(id) {
+            if(!confirm('Завершить заказ?')) return;
+            await fetch(`${API_URL}/api/admin/order/${id}/done`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id }) });
+            loadAdminOrders('active');
+        }
+
+        function editOrder(id, addr, cmt, itemsEncoded, currentTotal) {
+            document.getElementById('edit-order-id').value = id;
+            document.getElementById('edit-order-id-display').textContent = id;
+            document.getElementById('edit-order-address').value = addr;
+            document.getElementById('edit-order-comment').value = cmt;
+            document.getElementById('edit-order-discount').value = 0;
+
+            try { currentEditItems = JSON.parse(decodeURIComponent(itemsEncoded)); } catch(e) { currentEditItems = []; }
+            renderEditItems();
+            recalcEditTotal();
+
+            const select = document.getElementById('edit-order-add-select');
+            select.innerHTML = products.map(p => `<option value="${p.id}">${p.name} (${p.price}₽)</option>`).join('');
+
+            document.getElementById('edit-order-modal').classList.add('active');
+        }
+
+        function renderEditItems() {
+            const list = document.getElementById('edit-order-items-list');
+            list.innerHTML = currentEditItems.map((item, index) => `
+                <div class="edit-order-item">
+                    <div>
+                        <div style="font-weight:600; font-size:14px;">${item.name}</div>
+                        <div style="font-size:12px; color:#666;">${item.price} ₽</div>
+                    </div>
+                    <div class="edit-controls">
+                        <button class="edit-btn-small" onclick="changeEditItemQty(${index}, -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="edit-btn-small" onclick="changeEditItemQty(${index}, 1)">+</button>
+                        <button class="edit-btn-small" style="background:#ffdddd; color:red;" onclick="removeEditItem(${index})">x</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function changeEditItemQty(index, change) {
+            currentEditItems[index].quantity += change;
+            if (currentEditItems[index].quantity < 1) currentEditItems[index].quantity = 1;
+            renderEditItems();
+            recalcEditTotal();
+        }
+
+        function removeEditItem(index) {
+            currentEditItems.splice(index, 1);
+            renderEditItems();
+            recalcEditTotal();
+        }
+
+        function addProdToEditOrder() {
+            const select = document.getElementById('edit-order-add-select');
+            const prodId = parseInt(select.value);
+            const product = products.find(p => p.id === prodId);
+            const existing = currentEditItems.find(i => i.product_id === prodId);
+            if (existing) { existing.quantity++; } 
+            else { currentEditItems.push({ product_id: product.id, name: product.name, price: product.price, quantity: 1 }); }
+            renderEditItems();
+            recalcEditTotal();
+        }
+
+        function recalcEditTotal() {
+            let sum = currentEditItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+            const discount = parseInt(document.getElementById('edit-order-discount').value) || 0;
+            if (discount > 0) sum = sum - (sum * (discount / 100));
+            document.getElementById('edit-order-total').textContent = Math.ceil(sum);
+        }
+
+        async function saveOrderChanges() {
+            const id = document.getElementById('edit-order-id').value;
+            const addr = document.getElementById('edit-order-address').value;
+            const cmt = document.getElementById('edit-order-comment').value;
+            const total = parseFloat(document.getElementById('edit-order-total').textContent);
+            if (currentEditItems.length === 0) return alert('Заказ не может быть пустым');
+            try {
+                const res = await fetch(`${API_URL}/api/admin/order/${id}`, { 
+                    method: 'PUT', headers: {'Content-Type':'application/json'}, 
+                    body: JSON.stringify({ userId: userData.telegram_id, address: addr, comment: cmt, details: currentEditItems, total_price: total }) 
+                });
+                if(res.ok) { alert('Заказ обновлен!'); document.getElementById('edit-order-modal').classList.remove('active'); loadAdminOrders('active'); } 
+                else { alert('Ошибка сервера'); }
+            } catch(e) { console.error(e); alert('Ошибка сети'); }
+        }
+
+        // --- VISUAL DATABASE MANAGER ---
+        let currentDbData = [];
+
+        async function loadDbTable() {
+            currentDbTable = document.getElementById('db-table-select').value;
+            const container = document.getElementById('db-view-container');
+            container.innerHTML = 'Загрузка...';
+            try {
+                const res = await fetch(`${API_URL}/api/admin/db/${currentDbTable}?userId=${userData.telegram_id}`);
+                const data = await res.json();
+                if (data.error) return container.innerHTML = 'Ошибка доступа';
+                if (data.length === 0) {
+                    currentDbData = [];
+                    return container.innerHTML = 'Таблица пуста';
+                }
+
+                currentDbData = data;
+                
+                const cols = Object.keys(data[0]);
+                let tableHtml = '<table class="db-table"><thead><tr><th>Действия</th>';
+                cols.forEach(c => tableHtml += `<th>${c}</th>`);
+                tableHtml += '</tr></thead><tbody>';
+                
+                data.forEach((row, idx) => {
+                    tableHtml += '<tr>';
+                    tableHtml += `
+                        <td>
+                            <button class="db-action-btn" onclick="openEditRecord(${idx})">✏️</button>
+                            <button class="db-action-btn" style="color:red;" onclick="deleteDbRecord(${row.id})">🗑️</button>
+                        </td>
+                    `;
+                    cols.forEach(c => {
+                        let val = row[c];
+                        if (typeof val === 'object' && val !== null) val = JSON.stringify(val);
+                        tableHtml += `<td>${val}</td>`;
+                    });
+                    tableHtml += '</tr>';
+                });
+                tableHtml += '</tbody></table>';
+                container.innerHTML = tableHtml;
+
+            } catch(e) { container.innerHTML = 'Ошибка соединения'; }
+        }
+
+        function openEditRecord(idx) {
+            const row = currentDbData[idx];
+            currentDbId = row.id;
+            openDbModal(row);
+        }
+
+        function openCreateRecordModal() {
+            currentDbId = null; 
+            let template = {};
+            if (currentDbData.length > 0) {
+                Object.keys(currentDbData[0]).forEach(k => template[k] = '');
+            } else {
+                if (currentDbTable === 'faq') template = { question: '', answer: '' };
+                if (currentDbTable === 'expenses') template = { amount: '', comment: '' };
+            }
+            openDbModal(template);
+        }
+
+        function openDbModal(data) {
+            const container = document.getElementById('db-edit-fields');
+            const title = document.getElementById('db-edit-title');
+            title.textContent = currentDbId ? `Редактирование ID: ${currentDbId}` : 'Новая запись';
+            container.innerHTML = '';
+
+            Object.keys(data).forEach(key => {
+                if (key === 'created_at') return;
+                const val = data[key];
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                const label = document.createElement('label');
+                label.textContent = key;
+                let input;
+                if (key === 'id') {
+                    input = document.createElement('input');
+                    input.value = val;
+                    input.readOnly = true;
+                } else if (key === 'description' || key === 'answer' || key === 'details' || key === 'image_url') {
+                    input = document.createElement('textarea');
+                    input.rows = 3;
+                    input.value = val;
+                } else {
+                    input = document.createElement('input');
+                    input.value = val;
+                    if (key === 'price' || key === 'purchase_price' || key === 'stock' || key === 'points' || key === 'amount') {
+                        input.type = 'number';
+                    }
+                }
+                input.id = `db-field-${key}`;
+                input.dataset.key = key; 
+                div.appendChild(label);
+                div.appendChild(input);
+                container.appendChild(div);
+            });
+            document.getElementById('db-edit-modal').classList.add('active');
+        }
+
+        async function saveDbRecord() {
+            const inputs = document.querySelectorAll('#db-edit-fields [data-key]');
+            const payload = {};
+            inputs.forEach(inp => {
+                if (inp.readOnly) return; 
+                payload[inp.dataset.key] = inp.value;
+            });
+
+            const method = currentDbId ? 'PUT' : 'POST';
+            const url = currentDbId 
+                ? `${API_URL}/api/admin/db/${currentDbTable}/${currentDbId}`
+                : `${API_URL}/api/admin/db/${currentDbTable}`;
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json', 'user-id': userData.telegram_id },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) { alert('Сохранено'); document.getElementById('db-edit-modal').classList.remove('active'); loadDbTable(); } 
+                else { alert('Ошибка сохранения'); }
+            } catch(e) { alert('Ошибка сети'); }
+        }
+
+        async function deleteDbRecord(id) {
+            if(!confirm('Удалить эту запись навсегда?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/db/${currentDbTable}/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'user-id': userData.telegram_id }
+                });
+                if (res.ok) loadDbTable();
+                else alert('Ошибка удаления');
+            } catch(e) { alert('Ошибка сети'); }
+        }
+
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
