@@ -388,18 +388,13 @@
         function setCategory(cat) { currentCategory = cat; document.querySelectorAll('.cat-btn').forEach(btn => { btn.classList.remove('active'); if (btn.textContent === cat || (cat === 'all' && btn.textContent === 'Все')) btn.classList.add('active'); }); filterProducts(); }
         function filterProducts() { 
             const term = document.getElementById('search-input').value.toLowerCase(); 
-            
             const filtered = products.filter(p => { 
                 const matchesSearch = p.name.toLowerCase().includes(term); 
                 const matchesCategory = currentCategory === 'all' || p.category === currentCategory; 
-                
-                // 🔥 НОВАЯ ЛОГИКА:
-                // Показываем товар, если: (сток больше 0) ИЛИ (пользователь админ)
+                // СКРЫВАЕМ ПУСТЫЕ ТОВАРЫ ОТ НЕ-АДМИНОВ
                 const isVisible = p.stock > 0 || (userData && userData.is_admin);
-
                 return matchesSearch && matchesCategory && isVisible; 
             }); 
-            
             displayProducts(filtered); 
         }
         function displayProducts(list) { const container = document.getElementById('products-container'); container.innerHTML = ''; if (list.length === 0) { container.innerHTML = '<div style="grid-column: 1/-1; text-align: center;">Пусто</div>'; return; } list.forEach(p => { const cartItem = cart.find(c => c.product_id === p.id); const hasStock = p.stock > 0; let buttonHtml = ''; if (!hasStock) buttonHtml = `<div class="out-of-stock">Нет в наличии</div>`; else if (cartItem) { buttonHtml = `<div class="qty-control-catalog"><button onclick="changeQtyFromCatalog(${p.id}, -1)">-</button><div style="text-align:center"><div class="in-cart-text">В корзине</div><span>${cartItem.quantity}</span></div><button onclick="changeQtyFromCatalog(${p.id}, 1)">+</button></div>`; } else buttonHtml = `<button class="add-to-cart-btn" onclick="addToCart(${p.id})">В корзину +</button>`; const el = document.createElement('div'); el.className = 'product-card'; el.innerHTML = `<div class="product-image">${p.image_url ? `<img src="${p.image_url}">` : 'Фото'}</div><div class="product-name">${p.name}</div><div class="product-price">${p.price} ₽</div><div class="product-description">${p.description}</div>${buttonHtml}`; container.appendChild(el); }); }
@@ -464,7 +459,9 @@
 
                 rows.forEach((row, index) => {
                     if (!row.trim()) return;
-                    const cols = row.split(';'); 
+                    let cols = row.split(';'); 
+                    if (cols.length < 2) cols = row.split(',');
+
                     if (cols.length < 5) return; 
 
                     const clean = (val) => val ? val.trim().replace(/^"|"$/g, '') : '';
@@ -495,14 +492,13 @@
                 } catch (e) { alert('Ошибка сети'); }
                 fileInput.value = '';
             };
-            reader.readAsText(file, 'windows-1251'); 
+            reader.readAsText(file, 'utf-8'); 
         }
 
         // --- NEW PHOTO WIZARD LOGIC ---
         let wizActiveId = null;
 
         function openPhotoWizard() {
-            // 1. Filter products with no photo (placeholder)
             const noPhotoProds = products.filter(p => !p.image_url || p.image_url.includes('placeholder'));
             const container = document.getElementById('wiz-grid');
             
@@ -511,7 +507,6 @@
                 return;
             }
 
-            // 2. Render cards
             container.innerHTML = noPhotoProds.map(p => `
                 <div class="wiz-card" id="wiz-card-${p.id}" onclick="triggerWizUpload(${p.id})">
                     <div class="wiz-img"><img src="${p.image_url || ''}" id="wiz-img-${p.id}"></div>
@@ -529,12 +524,10 @@
             document.getElementById('wiz-file-input').click();
         }
 
-        // Handle file selection in Wizard
         document.getElementById('wiz-file-input').addEventListener('change', async function(e) {
             const file = e.target.files[0];
             if (!file || !wizActiveId) return;
 
-            // UI Feedback
             const card = document.getElementById(`wiz-card-${wizActiveId}`);
             card.classList.add('uploading');
 
@@ -550,15 +543,11 @@
                 const data = await res.json();
                 
                 if (data.success) {
-                    // Update Image UI immediately
                     const img = document.getElementById(`wiz-img-${wizActiveId}`);
                     img.src = data.imageUrl;
                     card.classList.remove('uploading');
-                    
-                    // Update global product list so we don't have to reload
                     const prod = products.find(p => p.id === wizActiveId);
                     if (prod) prod.image_url = data.imageUrl;
-
                 } else {
                     alert('Ошибка загрузки');
                     card.classList.remove('uploading');
@@ -567,8 +556,6 @@
                 alert('Ошибка сети');
                 card.classList.remove('uploading');
             }
-
-            // Reset input
             this.value = '';
         });
 
@@ -637,54 +624,16 @@
         }
 
         async function deleteProduct(id) {
-            // Останавливаем всплытие события, чтобы клик не ушел куда-то еще
             if (event) event.stopPropagation();
-
             if(!confirm('Точно удалить этот товар?')) return;
-
             try {
-                // Отправляем запрос на удаление
                 const res = await fetch(`${API_URL}/api/admin/product/${id}`, { 
                     method: 'DELETE', 
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'user-id': userData.telegram_id.toString() 
-                    } 
+                    headers: { 'Content-Type': 'application/json', 'user-id': userData.telegram_id.toString() } 
                 });
-
-                if (res.ok) {
-                    // Если всё ок - просто перезагружаем список. 
-                    // Это самый надежный способ "разбагать" интерфейс.
-                    await loadAdminProducts(); 
-                } else {
-                    const data = await res.json();
-                    alert('Ошибка удаления: ' + (data.error || 'Неизвестно'));
-                }
-            } catch(e) { 
-                console.error(e);
-                alert('Ошибка сети. Проверьте соединение.');
-            }
-        }
-
-                // Пытаемся прочитать ответ сервера
-                let data = {};
-                try { data = await res.json(); } catch(e) {}
-
-                if (res.ok) {
-                    // Если успешно - обновляем список
-                    loadAdminProducts(); 
-                } else {
-                    // Если ошибка - показываем текст ошибки
-                    alert('Не удалось удалить: ' + (data.error || 'Ошибка сервера'));
-                    btn.textContent = originalText;
-                    btn.disabled = false;
-                }
-            } catch(e) { 
-                console.error(e);
-                alert('Ошибка сети. Проверьте интернет.');
-                btn.textContent = originalText;
-                btn.disabled = false;
-            }
+                if (res.ok) { await loadAdminProducts(); } 
+                else { const data = await res.json(); alert('Ошибка удаления: ' + (data.error || 'Неизвестно')); }
+            } catch(e) { console.error(e); alert('Ошибка сети. Проверьте соединение.'); }
         }
 
         // ORDERS MANAGEMENT
@@ -960,5 +909,3 @@
     </script>
 </body>
 </html>
-
-
