@@ -66,7 +66,7 @@
         }
         .logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
-        /* Profile Button */
+        /* Кнопка профиля */
         .profile-btn { width: 36px; height: 36px; background: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; }
         .help-icon { width: 36px; height: 36px; background-color: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; cursor: pointer; }
 
@@ -84,13 +84,11 @@
         .product-image img { width: 100%; height: 100%; object-fit: contain; }
         .product-name { font-weight: 600; margin-bottom: 5px; color: var(--primary-color); font-size: 14px; line-height: 1.2; height: 34px; overflow: hidden; }
         .product-price { color: var(--accent-color); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
-        .product-description { display: none; } /* Скрыто в сетке для компактности */
         .add-to-cart-btn { background-color: var(--primary-color); color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 13px; }
         
         .qty-control-catalog { display: flex; justify-content: space-between; align-items: center; background-color: var(--red-color); color: white; border-radius: 8px; padding: 4px; width: 100%; }
         .qty-control-catalog button { background: none; border: none; color: white; font-weight: bold; font-size: 16px; padding: 0 10px; }
         .qty-control-catalog span { font-weight: 600; font-size: 14px; }
-        .in-cart-text { display: none; } 
 
         .cart-fab { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-color), #ff4d4d); border-radius: 50%; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; z-index: 90; }
         .cart-badge { position: absolute; top: -5px; right: -5px; background-color: #333; color: white; font-size: 12px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
@@ -118,21 +116,21 @@
         .points-switch { display: flex; justify-content: space-between; align-items: center; background: #f0f0f0; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
         .switch-input { width: 20px; height: 20px; }
 
-        /* Profile Styles */
+        /* Стили профиля */
         .profile-header { text-align: center; margin-bottom: 20px; }
         .profile-points { font-size: 32px; font-weight: bold; color: var(--accent-color); }
         .order-history-item { background: #f9f9f9; border-bottom: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
         .order-status { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: white; background: #999; }
         .order-status.completed { background: var(--green-color); }
 
-        /* Admin Select Menu */
+        /* Админка: меню */
         .admin-select { width: 100%; padding: 12px; font-size: 16px; margin-bottom: 20px; border-radius: 8px; border: 2px solid #333; background: #fff; font-weight: bold; }
         .admin-section { display: none; }
         .admin-section.active { display: block; }
         
         .old-price { text-decoration: line-through; color: #999; font-size: 14px; margin-right: 5px; }
         
-        /* Promocode List */
+        /* Промокоды */
         .promo-item { display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; padding: 10px; margin-bottom: 5px; border-radius: 6px; }
     </style>
 </head>
@@ -145,6 +143,7 @@
             <button class="btn-primary" onclick="registerUser()">Продолжить</button>
         </div>
     </div>
+    
     <div id="main-screen" class="screen">
         <header>
             <div class="profile-btn" onclick="openProfile()">👤</div>
@@ -162,9 +161,9 @@
         <div class="cart-fab" onclick="openCart()">🛒<div id="cart-badge" class="cart-badge" style="display:none">0</div></div>
     </div>
 
-    <!-- MODALS -->
+    <!-- МОДАЛЬНЫЕ ОКНА -->
     
-    <!-- Profile Modal -->
+    <!-- Профиль -->
     <div id="profile-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('profile-modal')">&times;</span>
@@ -180,10 +179,10 @@
         </div>
     </div>
 
-    <!-- FAQ Modal -->
+    <!-- FAQ -->
     <div id="faq-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('faq-modal')">&times;</span><h2>Часто задаваемые вопросы</h2><div id="faq-content"></div></div></div>
     
-    <!-- Cart Modal -->
+    <!-- Корзина -->
     <div id="cart-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('cart-modal')">&times;</span>
@@ -218,12 +217,13 @@
     <div id="age-warning-modal" class="modal"><div class="modal-content" style="text-align: center;"><div style="font-size: 40px; margin-bottom: 10px;">🔞</div><h2>Внимание!</h2><p>Учитывайте, что если ваш возраст меньше 18 лет - курьер в праве отказать вам в выдаче товара.</p><button class="btn-primary" onclick="showAddressForm()">Всё понятно, мне есть 18</button><button class="btn-primary btn-danger" onclick="closeModal('age-warning-modal')" style="margin-top: 10px; background: #999;">Отмена</button></div></div>
     <div id="address-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('address-modal')">&times;</span><h2>Оформление</h2><div class="form-group"><label>Адрес доставки</label><textarea id="delivery-address" rows="3"></textarea></div><div class="form-group"><label>Комментарий</label><textarea id="order-comment" rows="2"></textarea></div><button class="btn-primary" onclick="submitOrder()">Подтвердить заказ</button></div></div>
     
-    <!-- ADMIN MODAL -->
+    <!-- АДМИН-ПАНЕЛЬ -->
     <div id="admin-modal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
             <h2 style="margin-bottom:15px">Админ-панель</h2>
             
+            <!-- Меню -->
             <select id="admin-menu-select" class="admin-select" onchange="switchAdminSection(this.value)">
                 <option value="stats">📊 Статистика</option>
                 <option value="orders">📦 Заказы</option>
@@ -232,7 +232,7 @@
                 <option value="db">💾 База Данных</option>
             </select>
 
-            <!-- SECTION 1: STATS -->
+            <!-- 1: СТАТИСТИКА -->
             <div id="admin-stats" class="admin-section active">
                 <div id="admin-stats-container"></div>
                 <h3 style="margin-top:15px">Расход</h3>
@@ -241,7 +241,7 @@
                 <button class="btn-primary btn-danger" onclick="addExpense()">Добавить</button>
             </div>
 
-            <!-- SECTION 2: ORDERS -->
+            <!-- 2: ЗАКАЗЫ -->
             <div id="admin-orders" class="admin-section">
                 <div style="display:flex; gap:10px; margin-bottom:10px;">
                     <button class="cat-btn active" onclick="loadAdminOrders('active')" id="btn-ord-active">Активные</button>
@@ -250,9 +250,9 @@
                 <div id="admin-orders-list"></div>
             </div>
 
-            <!-- SECTION 3: PRODUCTS -->
+            <!-- 3: ТОВАРЫ -->
             <div id="admin-products" class="admin-section">
-                <!-- IMPORT BLOCK -->
+                <!-- Импорт -->
                 <div style="background: #e8f5e9; padding: 10px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c8e6c9;">
                     <h4 style="margin-bottom:5px">🚀 Импорт / Фото</h4>
                     <div style="display:flex; gap:5px;">
@@ -275,7 +275,7 @@
                 <div id="admin-products-list" style="margin-top:20px;"></div>
             </div>
 
-            <!-- SECTION 4: PROMOCODES -->
+            <!-- 4: ПРОМОКОДЫ -->
             <div id="admin-promocodes" class="admin-section">
                 <h3>Управление промокодами</h3>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -286,7 +286,7 @@
                 <div id="admin-promo-list">Загрузка...</div>
             </div>
 
-            <!-- SECTION 5: DATABASE -->
+            <!-- 5: БАЗА ДАННЫХ -->
             <div id="admin-db" class="admin-section">
                 <select id="db-table-select" style="width:100%; margin-bottom:10px; padding:10px;" onchange="loadDbTable()">
                     <option value="users">Users</option>
@@ -299,7 +299,7 @@
         </div>
     </div>
 
-    <!-- Edit Order Modal (Admin) -->
+    <!-- Редактирование заказа -->
     <div id="edit-order-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('edit-order-modal')">&times;</span>
@@ -312,7 +312,7 @@
         </div>
     </div>
 
-    <!-- Photo Wizard Modal -->
+    <!-- Мастер Фото -->
     <div id="photo-wizard-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('photo-wizard-modal')">&times;</span>
@@ -327,6 +327,7 @@
         const API_URL = 'https://ytiiiipuff-production.up.railway.app';
         let userData = null, products = [], cart = [], currentCategory = 'all';
         let currentPromo = { code: null, discount: 0 };
+        let wizActiveId = null;
 
         const phoneInput = document.getElementById('phone');
         phoneInput.addEventListener('input', function(e) { this.value = this.value.replace(/\D/g, ''); });
@@ -362,10 +363,10 @@
             if (data.success) { userData = data.user; showMainScreen(); loadCatalog(); } else alert('Ошибка регистрации');
         }
 
-        // --- PROFILE LOGIC ---
+        // --- ПРОФИЛЬ ---
         async function openProfile() {
             if (!userData) return;
-            // Обновляем данные пользователя
+            // Обновляем данные (баллы)
             userData = await checkUserRegistration(userData.telegram_id);
             document.getElementById('profile-name').textContent = userData.name;
             document.getElementById('profile-phone').textContent = userData.phone;
@@ -403,7 +404,7 @@
             document.getElementById('profile-modal').classList.add('active');
         }
 
-        // --- CATALOG & CART ---
+        // --- КАТАЛОГ И КОРЗИНА ---
         async function loadCatalog() { 
             const container = document.getElementById('products-container'); 
             if (products.length === 0) { 
@@ -445,11 +446,10 @@
         async function removeFromCart(id) { await fetch(`${API_URL}/api/cart/remove`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id }) }); await fetchCart(); if(document.getElementById('cart-modal').classList.contains('active')) openCart(); }
         function updateCartBadge() { const c = cart.reduce((s, i) => s + i.quantity, 0); const b = document.getElementById('cart-badge'); b.textContent = c; b.style.display = c > 0 ? 'flex' : 'none'; }
 
-        // --- CART CALCULATIONS ---
+        // --- ЛОГИКА РАСЧЕТА КОРЗИНЫ ---
         async function openCart() {
             await fetchCart();
-            // Обновим данные юзера для актуальных баллов
-            userData = await checkUserRegistration(userData.telegram_id); 
+            userData = await checkUserRegistration(userData.telegram_id); // Обновляем баллы
             
             const modal = document.getElementById('cart-modal');
             const container = document.getElementById('cart-items-container');
@@ -499,14 +499,14 @@
         function updateCartTotals() {
             let subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
             
-            // 1. Промокод
+            // 1. Скидка
             let discountAmount = 0;
             if (currentPromo.discount > 0) {
                 discountAmount = Math.floor(subtotal * (currentPromo.discount / 100));
             }
             let priceAfterPromo = subtotal - discountAmount;
 
-            // 2. Баллы (макс 15% от цены ПОСЛЕ промокода)
+            // 2. Баллы (15% от остатка)
             let pointsUsed = 0;
             const usePoints = document.getElementById('use-points-check').checked;
             if (usePoints && userData.points > 0) {
@@ -575,7 +575,7 @@
             } catch(e) { alert('Ошибка сети'); }
         }
 
-        // --- ADMIN PANEL (UPDATED) ---
+        // --- АДМИН ПАНЕЛЬ ---
         function openAdminPanel() { 
             document.getElementById('admin-modal').classList.add('active'); 
             switchAdminSection('stats'); 
@@ -591,7 +591,7 @@
             if(val === 'db') loadDbTable();
         }
 
-        // Stats
+        // Статистика
         async function loadStats() {
             try {
                 const res = await fetch(`${API_URL}/api/admin/stats?userId=${userData.telegram_id}`);
@@ -606,7 +606,7 @@
             } catch(e){}
         }
 
-        // Promocodes
+        // Промокоды
         async function loadPromocodes() {
             const container = document.getElementById('admin-promo-list');
             try {
@@ -637,7 +637,7 @@
             loadPromocodes();
         }
 
-        // Orders (Admin)
+        // Заказы
         async function loadAdminOrders(status) {
             document.getElementById('btn-ord-active').classList.toggle('active', status === 'active');
             document.getElementById('btn-ord-comp').classList.toggle('active', status === 'completed');
@@ -679,7 +679,7 @@
             loadAdminOrders('active');
         }
 
-        // Products (Standard)
+        // Товары
         async function loadAdminProducts() {
             const c = document.getElementById('admin-products-list');
             try {
@@ -693,12 +693,8 @@
                 `).join('');
             } catch(e){}
         }
-        // ... (остальные функции админки: deleteProduct, addNewProduct, csv, photo wizard - можно оставить те же или скопировать из прошлого кода, они не изменились логически, только placement)
-        // Для экономии места я предполагаю, что функции addNewProduct, deleteProduct, processCsvFile, openPhotoWizard скопированы из предыдущего ответа или остались в <script>
-        // Я добавлю только критичные:
-        async function deleteProduct(id) { if(!confirm('Удалить?')) return; await fetch(`${API_URL}/api/admin/product/${id}`, {method:'DELETE', headers:{'user-id':userData.telegram_id.toString()}}); loadAdminProducts(); }
+
         async function addNewProduct() {
-            // ... (старая логика из прошлого ответа)
             const formData = new FormData();
             formData.append('userId', userData.telegram_id);
             formData.append('category', document.getElementById('new-prod-cat').value);
@@ -707,15 +703,94 @@
             formData.append('purchase_price', document.getElementById('new-prod-buy').value);
             formData.append('stock', document.getElementById('new-prod-stock').value);
             formData.append('photo', document.getElementById('new-prod-file').files[0]);
+            
+            if(!formData.get('name') || !formData.get('price')) return alert('Поля?');
+
             await fetch(`${API_URL}/api/admin/product`, {method:'POST', body:formData});
             loadAdminProducts();
         }
+        async function deleteProduct(id) { if(!confirm('Удалить?')) return; await fetch(`${API_URL}/api/admin/product/${id}`, {method:'DELETE', headers:{'user-id':userData.telegram_id.toString()}}); loadAdminProducts(); }
 
-        // Helper functions
+        // CSV
+        function processCsvFile() {
+            const fileInput = document.getElementById('csv-file-input');
+            const file = fileInput.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const text = e.target.result;
+                const rows = text.split('\n');
+                const productsToUpload = [];
+                rows.forEach((row, index) => {
+                    if (!row.trim()) return;
+                    let cols = row.split(';'); if (cols.length < 2) cols = row.split(',');
+                    if (cols.length < 5 || (index === 0 && (cols[0].toLowerCase().includes('кат') || cols[0].toLowerCase().includes('cat')))) return;
+                    const clean = (val) => val ? val.trim().replace(/^"|"$/g, '') : '';
+                    productsToUpload.push({
+                        category: clean(cols[0]) || 'Разное', name: clean(cols[1]), description: clean(cols[2]),
+                        purchase_price: parseFloat(clean(cols[3]).replace(',', '.')) || 0, price: parseFloat(clean(cols[4]).replace(',', '.')) || 0, stock: parseInt(clean(cols[5])) || 0
+                    });
+                });
+                if (productsToUpload.length > 0 && confirm(`Найдено ${productsToUpload.length}. Загрузить?`)) {
+                    await fetch(`${API_URL}/api/admin/products/batch`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: userData.telegram_id, products: productsToUpload }) });
+                    loadAdminProducts();
+                }
+                fileInput.value = '';
+            };
+            reader.readAsText(file, 'utf-8'); 
+        }
+
+        // Мастер Фото
+        function openPhotoWizard() {
+            const noPhotoProds = products.filter(p => !p.image_url || p.image_url.includes('placeholder'));
+            const container = document.getElementById('wiz-grid');
+            if (noPhotoProds.length === 0) return alert('Все товары с фото!');
+            container.innerHTML = noPhotoProds.map(p => `
+                <div class="product-card" onclick="triggerWizUpload(${p.id})">
+                    <div class="product-image"><img src="${p.image_url || ''}" id="wiz-img-${p.id}"></div>
+                    <div style="font-weight:bold;">${p.name}</div>
+                    <div style="font-size:12px; color:#999;">Нажмите чтобы добавить фото</div>
+                </div>
+            `).join('');
+            document.getElementById('photo-wizard-modal').classList.add('active');
+        }
+        function triggerWizUpload(id) { wizActiveId = id; document.getElementById('wiz-file-input').click(); }
+        document.getElementById('wiz-file-input').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file || !wizActiveId) return;
+            const formData = new FormData(); formData.append('userId', userData.telegram_id); formData.append('photo', file);
+            const res = await fetch(`${API_URL}/api/admin/product/${wizActiveId}/image`, { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) { document.getElementById(`wiz-img-${wizActiveId}`).src = data.imageUrl; }
+            this.value = '';
+        });
+
+        // БД Менеджер
+        async function loadDbTable() {
+            const t = document.getElementById('db-table-select').value;
+            const c = document.getElementById('db-view-container');
+            c.innerHTML = 'Загрузка...';
+            try {
+                const res = await fetch(`${API_URL}/api/admin/db/${t}?userId=${userData.telegram_id}`);
+                const data = await res.json();
+                if(data.length === 0) return c.innerHTML = 'Пусто';
+                const cols = Object.keys(data[0]);
+                let html = '<table style="width:100%; border-collapse:collapse; font-size:12px;"><thead><tr><th>Act</th>' + cols.map(k=>`<th>${k}</th>`).join('') + '</tr></thead><tbody>';
+                html += data.map(row => `<tr><td><button onclick="deleteDbRecord(${row.id})">Del</button></td>` + cols.map(k=>`<td style="border:1px solid #ddd; padding:4px;">${row[k]}</td>`).join('') + '</tr>').join('');
+                c.innerHTML = html + '</tbody></table>';
+            } catch(e){ c.innerHTML = 'Ошибка'; }
+        }
+        async function deleteDbRecord(id) {
+            if(!confirm('Удалить?')) return;
+            const t = document.getElementById('db-table-select').value;
+            await fetch(`${API_URL}/api/admin/db/${t}/${id}`, { method: 'DELETE', headers: {'user-id': userData.telegram_id} });
+            loadDbTable();
+        }
+
+        // Helpers
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         async function openFAQ() { document.getElementById('faq-modal').classList.add('active'); const res = await fetch(`${API_URL}/api/faq`); document.getElementById('faq-content').innerHTML = (await res.json()).map(i => `<div><h3>${i.question}</h3><p>${i.answer}</p></div>`).join(''); }
 
-        // Start
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
