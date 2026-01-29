@@ -65,8 +65,6 @@
             position: sticky; top: 0; z-index: 100;
         }
         .logo { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, var(--primary-color), var(--accent-color)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        /* Кнопка профиля */
         .profile-btn { width: 36px; height: 36px; background: #ddd; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; }
         .help-icon { width: 36px; height: 36px; background-color: var(--primary-color); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; cursor: pointer; }
 
@@ -85,11 +83,9 @@
         .product-name { font-weight: 600; margin-bottom: 5px; color: var(--primary-color); font-size: 14px; line-height: 1.2; height: 34px; overflow: hidden; }
         .product-price { color: var(--accent-color); font-weight: 700; font-size: 16px; margin-bottom: 8px; }
         .add-to-cart-btn { background-color: var(--primary-color); color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; font-size: 13px; }
-        
         .qty-control-catalog { display: flex; justify-content: space-between; align-items: center; background-color: var(--red-color); color: white; border-radius: 8px; padding: 4px; width: 100%; }
         .qty-control-catalog button { background: none; border: none; color: white; font-weight: bold; font-size: 16px; padding: 0 10px; }
         .qty-control-catalog span { font-weight: 600; font-size: 14px; }
-
         .cart-fab { position: fixed; bottom: 30px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, var(--accent-color), #ff4d4d); border-radius: 50%; box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4); display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; z-index: 90; }
         .cart-badge { position: absolute; top: -5px; right: -5px; background-color: #333; color: white; font-size: 12px; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
         .admin-fab { position: fixed; bottom: 30px; left: 20px; width: 50px; height: 50px; background: linear-gradient(135deg, #333, #000); border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); display: none; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; z-index: 90; }
@@ -108,30 +104,46 @@
         .cart-summary { margin-top: 20px; border-top: 2px solid #333; padding-top: 15px; }
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
         .total-row { display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; color: var(--accent-color); margin-top: 10px; }
-        
         .promo-section { display: flex; gap: 10px; margin-bottom: 15px; }
         .promo-section input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
         .promo-section button { padding: 0 15px; background: #333; color: white; border: none; border-radius: 6px; }
-        
         .points-switch { display: flex; justify-content: space-between; align-items: center; background: #f0f0f0; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
         .switch-input { width: 20px; height: 20px; }
+        .old-price { text-decoration: line-through; color: #999; font-size: 14px; margin-right: 5px; }
 
-        /* Стили профиля */
         .profile-header { text-align: center; margin-bottom: 20px; }
         .profile-points { font-size: 32px; font-weight: bold; color: var(--accent-color); }
-        .order-history-item { background: #f9f9f9; border-bottom: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
+        .order-history-item { background: #f9f9f9; border-bottom: 1px solid #eee; padding: 10px; border-radius: 6px; margin-bottom: 8px; cursor: pointer; transition: background 0.2s; }
+        .order-history-item:active { background: #eee; }
         .order-status { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; color: white; background: #999; }
         .order-status.completed { background: var(--green-color); }
 
-        /* Админка: меню */
-        .admin-select { width: 100%; padding: 12px; font-size: 16px; margin-bottom: 20px; border-radius: 8px; border: 2px solid #333; background: #fff; font-weight: bold; }
-        .admin-section { display: none; }
-        .admin-section.active { display: block; }
+        /* --- ADMIN STYLES (ORIGINAL RESTORED) --- */
+        .admin-tab-content { display: none; }
+        .admin-tab-content.active { display: block; }
+        .order-admin-card { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #eee; }
+        .delete-prod-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; font-size: 12px; margin-top: 5px; cursor: pointer;}
+        .edit-order-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f5f5f5; border-radius: 8px; margin-bottom: 8px; }
+        .edit-controls { display: flex; align-items: center; gap: 8px; }
+        .edit-btn-small { width: 24px; height: 24px; border: none; background: #ddd; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .stock-control { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+        .stock-input { width: 60px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; }
+        .db-table-container { overflow-x: auto; margin-top: 10px; background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 5px; }
+        .db-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .db-table th, .db-table td { padding: 8px; border: 1px solid #ddd; text-align: left; white-space: nowrap; max-width: 150px; overflow: hidden; text-overflow: ellipsis;}
+        .db-table th { background: #f0f0f0; }
         
-        .old-price { text-decoration: line-through; color: #999; font-size: 14px; margin-right: 5px; }
+        /* SIDEBAR STYLES */
+        .sidebar { position: fixed; top: 0; left: -250px; width: 250px; height: 100%; background: #333; color: white; z-index: 2000; transition: left 0.3s ease; display: flex; flex-direction: column; padding-top: 60px; }
+        .sidebar.open { left: 0; }
+        .sidebar-btn { background: none; border: none; color: #ccc; text-align: left; padding: 15px 20px; font-size: 18px; font-weight: 500; border-bottom: 1px solid #444; cursor: pointer; }
+        .sidebar-btn.active { background: #444; color: white; border-left: 4px solid var(--accent-color); }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; }
+        .sidebar-overlay.open { display: block; }
+        .hamburger-btn { position: absolute; top: 15px; left: 20px; font-size: 28px; cursor: pointer; color: #333; z-index: 100; }
         
-        /* Промокоды */
         .promo-item { display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; padding: 10px; margin-bottom: 5px; border-radius: 6px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -161,9 +173,9 @@
         <div class="cart-fab" onclick="openCart()">🛒<div id="cart-badge" class="cart-badge" style="display:none">0</div></div>
     </div>
 
-    <!-- МОДАЛЬНЫЕ ОКНА -->
+    <!-- MODALS -->
     
-    <!-- Профиль -->
+    <!-- Profile -->
     <div id="profile-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('profile-modal')">&times;</span>
@@ -179,30 +191,28 @@
         </div>
     </div>
 
-    <!-- FAQ -->
-    <div id="faq-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('faq-modal')">&times;</span><h2>Часто задаваемые вопросы</h2><div id="faq-content"></div></div></div>
-    
-    <!-- Корзина -->
+    <!-- Order Details (User) -->
+    <div id="order-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('order-details-modal')">&times;</span>
+            <h3>Детали заказа #<span id="detail-id"></span></h3>
+            <div id="detail-items" style="margin-bottom:15px; max-height:200px; overflow-y:auto; background:#f9f9f9; padding:10px; border-radius:8px;"></div>
+            <div class="detail-row"><span>Статус:</span><span id="detail-status" style="font-weight:bold;"></span></div>
+            <div class="detail-row"><span>Промокод:</span><span id="detail-promo">Нет</span></div>
+            <div class="detail-row"><span>Баллы списано:</span><span id="detail-points">0</span></div>
+            <div class="detail-row" style="font-size:18px; font-weight:bold; border:none; margin-top:10px;"><span>Итого:</span><span id="detail-total">0 ₽</span></div>
+        </div>
+    </div>
+
+    <!-- Cart -->
     <div id="cart-modal" class="modal">
         <div class="modal-content">
             <span class="close-btn" onclick="closeModal('cart-modal')">&times;</span>
             <h2>Корзина</h2>
             <div id="cart-items-container"></div>
-            
             <div id="cart-footer" style="display:none;">
-                <div class="promo-section">
-                    <input type="text" id="promo-input" placeholder="Промокод">
-                    <button onclick="applyPromo()">OK</button>
-                </div>
-                
-                <div class="points-switch">
-                    <div>
-                        <div style="font-weight:600;">Списать баллы</div>
-                        <div style="font-size:11px; color:#666;">Доступно: <span id="cart-user-points">0</span> (макс 15%)</div>
-                    </div>
-                    <input type="checkbox" id="use-points-check" class="switch-input" onchange="updateCartTotals()">
-                </div>
-
+                <div class="promo-section"><input type="text" id="promo-input" placeholder="Промокод"><button onclick="applyPromo()">OK</button></div>
+                <div class="points-switch"><div><div style="font-weight:600;">Списать баллы</div><div style="font-size:11px; color:#666;">Доступно: <span id="cart-user-points">0</span> (макс 15%)</div></div><input type="checkbox" id="use-points-check" class="switch-input" onchange="updateCartTotals()"></div>
                 <div class="cart-summary">
                     <div class="summary-row"><span>Товары:</span><span id="sum-items">0 ₽</span></div>
                     <div class="summary-row" id="row-discount" style="display:none; color:var(--green-color);"><span>Скидка (<span id="promo-percent">0</span>%):</span><span>-<span id="sum-discount">0</span> ₽</span></div>
@@ -213,27 +223,30 @@
             </div>
         </div>
     </div>
-
     <div id="age-warning-modal" class="modal"><div class="modal-content" style="text-align: center;"><div style="font-size: 40px; margin-bottom: 10px;">🔞</div><h2>Внимание!</h2><p>Учитывайте, что если ваш возраст меньше 18 лет - курьер в праве отказать вам в выдаче товара.</p><button class="btn-primary" onclick="showAddressForm()">Всё понятно, мне есть 18</button><button class="btn-primary btn-danger" onclick="closeModal('age-warning-modal')" style="margin-top: 10px; background: #999;">Отмена</button></div></div>
     <div id="address-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('address-modal')">&times;</span><h2>Оформление</h2><div class="form-group"><label>Адрес доставки</label><textarea id="delivery-address" rows="3"></textarea></div><div class="form-group"><label>Комментарий</label><textarea id="order-comment" rows="2"></textarea></div><button class="btn-primary" onclick="submitOrder()">Подтвердить заказ</button></div></div>
-    
-    <!-- АДМИН-ПАНЕЛЬ -->
-    <div id="admin-modal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
-            <h2 style="margin-bottom:15px">Админ-панель</h2>
-            
-            <!-- Меню -->
-            <select id="admin-menu-select" class="admin-select" onchange="switchAdminSection(this.value)">
-                <option value="stats">📊 Статистика</option>
-                <option value="orders">📦 Заказы</option>
-                <option value="products">➕ Товары</option>
-                <option value="promocodes">🏷️ Промокоды</option>
-                <option value="db">💾 База Данных</option>
-            </select>
+    <div id="faq-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('faq-modal')">&times;</span><h2>Часто задаваемые вопросы</h2><div id="faq-content"></div></div></div>
 
-            <!-- 1: СТАТИСТИКА -->
-            <div id="admin-stats" class="admin-section active">
+    <!-- ADMIN PANEL -->
+    <div id="admin-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px; height: 90vh;">
+            <div class="hamburger-btn" onclick="toggleSidebar()">☰</div>
+            <span class="close-btn" onclick="closeModal('admin-modal')">&times;</span>
+            <h2 style="text-align:center; margin-bottom:20px;">Админ-панель</h2>
+            
+            <!-- SIDEBAR -->
+            <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+            <div class="sidebar" id="admin-sidebar">
+                <div style="padding:0 20px; margin-bottom:20px; font-weight:bold; font-size:20px;">Меню</div>
+                <button class="sidebar-btn active" onclick="switchAdminTab('stats')">📊 Статистика</button>
+                <button class="sidebar-btn" onclick="switchAdminTab('orders')">📦 Заказы</button>
+                <button class="sidebar-btn" onclick="switchAdminTab('products')">➕ Товары</button>
+                <button class="sidebar-btn" onclick="switchAdminTab('promocodes')">🏷️ Промокоды</button>
+                <button class="sidebar-btn" onclick="switchAdminTab('db')">💾 База Данных</button>
+            </div>
+
+            <!-- TABS CONTENT (ORIGINAL) -->
+            <div id="admin-stats-tab" class="admin-tab-content active">
                 <div id="admin-stats-container"></div>
                 <h3 style="margin-top:15px">Расход</h3>
                 <input type="number" id="expense-amount" placeholder="Сумма" style="width:100%; padding:10px; margin-bottom:5px;">
@@ -241,8 +254,7 @@
                 <button class="btn-primary btn-danger" onclick="addExpense()">Добавить</button>
             </div>
 
-            <!-- 2: ЗАКАЗЫ -->
-            <div id="admin-orders" class="admin-section">
+            <div id="admin-orders-tab" class="admin-tab-content">
                 <div style="display:flex; gap:10px; margin-bottom:10px;">
                     <button class="cat-btn active" onclick="loadAdminOrders('active')" id="btn-ord-active">Активные</button>
                     <button class="cat-btn" onclick="loadAdminOrders('completed')" id="btn-ord-comp">Архив</button>
@@ -250,77 +262,48 @@
                 <div id="admin-orders-list"></div>
             </div>
 
-            <!-- 3: ТОВАРЫ -->
-            <div id="admin-products" class="admin-section">
-                <!-- Импорт -->
-                <div style="background: #e8f5e9; padding: 10px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c8e6c9;">
-                    <h4 style="margin-bottom:5px">🚀 Импорт / Фото</h4>
-                    <div style="display:flex; gap:5px;">
+            <div id="admin-products-tab" class="admin-tab-content">
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c8e6c9;">
+                    <h4 style="margin-bottom:10px">🚀 Импорт и Фото</h4>
+                    <div style="display:flex; gap:10px;">
                         <input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="processCsvFile()">
-                        <button class="btn-primary btn-green" style="margin:0; font-size:12px; flex:1;" onclick="document.getElementById('csv-file-input').click()">📥 Excel (CSV)</button>
-                        <button class="btn-primary btn-blue" style="margin:0; font-size:12px; flex:1;" onclick="openPhotoWizard()">📸 Фото Мастер</button>
+                        <button class="btn-primary btn-green" style="margin:0; font-size:14px;" onclick="document.getElementById('csv-file-input').click()">📥 Импорт Excel</button>
+                        <button class="btn-primary btn-blue" style="margin:0; font-size:14px;" onclick="openPhotoWizard()">📸 Мастер Фото</button>
                     </div>
                 </div>
-
-                <h3>Новый товар</h3>
+                <h3>Добавить товар</h3>
                 <div class="form-group"><select id="new-prod-cat"><option value="Жидкости">Жидкости</option><option value="Одноразки">Одноразки</option><option value="Снюс">Снюс</option><option value="POD-системы">POD-системы</option><option value="Картриджи">Картриджи</option></select></div>
                 <div class="form-group"><input type="text" id="new-prod-name" placeholder="Название"></div>
-                <div style="display:flex; gap:10px;">
-                    <div class="form-group"><input type="number" id="new-prod-buy" placeholder="Закуп"></div>
-                    <div class="form-group"><input type="number" id="new-prod-sell" placeholder="Продажа"></div>
-                </div>
+                <div style="display:flex; gap:10px;"><div class="form-group"><input type="number" id="new-prod-buy" placeholder="Закуп"></div><div class="form-group"><input type="number" id="new-prod-sell" placeholder="Продажа"></div></div>
                 <div class="form-group"><input type="number" id="new-prod-stock" placeholder="Кол-во"></div>
                 <div class="form-group"><input type="file" id="new-prod-file" accept="image/*"></div>
-                <button class="btn-primary btn-green" onclick="addNewProduct()">Создать</button>
+                <button class="btn-primary btn-green" onclick="addNewProduct()">Создать товар</button>
                 <div id="admin-products-list" style="margin-top:20px;"></div>
             </div>
 
-            <!-- 4: ПРОМОКОДЫ -->
-            <div id="admin-promocodes" class="admin-section">
-                <h3>Управление промокодами</h3>
+            <div id="admin-promocodes-tab" class="admin-tab-content">
+                <h3>Промокоды</h3>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
-                    <input type="text" id="new-promo-code" placeholder="Код (напр. SALE10)" style="flex:2; padding:10px;">
+                    <input type="text" id="new-promo-code" placeholder="Код (напр. SALE)" style="flex:2; padding:10px;">
                     <input type="number" id="new-promo-percent" placeholder="%" style="flex:1; padding:10px;">
                     <button class="btn-primary btn-green" style="margin:0; width:auto;" onclick="addPromo()">+</button>
                 </div>
                 <div id="admin-promo-list">Загрузка...</div>
             </div>
 
-            <!-- 5: БАЗА ДАННЫХ -->
-            <div id="admin-db" class="admin-section">
-                <select id="db-table-select" style="width:100%; margin-bottom:10px; padding:10px;" onchange="loadDbTable()">
-                    <option value="users">Users</option>
-                    <option value="promocodes">Promocodes</option>
-                    <option value="products">Products</option>
-                    <option value="expenses">Expenses</option>
-                </select>
-                <div id="db-view-container" style="overflow-x:auto;"></div>
+            <div id="admin-db-tab" class="admin-tab-content">
+                <select id="db-table-select" style="width:100%; margin-bottom:10px; padding:10px;" onchange="loadDbTable()"><option value="users">Users</option><option value="promocodes">Promocodes</option><option value="products">Products</option><option value="expenses">Expenses</option></select>
+                <div id="db-view-container" class="db-table-container"></div>
             </div>
         </div>
     </div>
 
-    <!-- Редактирование заказа -->
+    <!-- Edit Order Modal -->
     <div id="edit-order-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('edit-order-modal')">&times;</span>
-            <h3>Ред. заказ #<span id="edit-order-id-display"></span></h3>
-            <input type="hidden" id="edit-order-id">
-            <div id="edit-order-items-list"></div>
-            <div class="form-group"><label>Сумма</label><input type="number" id="edit-order-total"></div>
-            <div class="form-group"><label>Адрес</label><textarea id="edit-order-address"></textarea></div>
-            <button class="btn-primary" onclick="saveOrderChanges()">Сохранить</button>
-        </div>
+        <div class="modal-content"><span class="close-btn" onclick="closeModal('edit-order-modal')">&times;</span><h3>Редактировать #<span id="edit-order-id-display"></span></h3><input type="hidden" id="edit-order-id"><div id="edit-order-items-list"></div><div class="form-group"><label>Сумма</label><input type="number" id="edit-order-total"></div><div class="form-group"><label>Адрес</label><textarea id="edit-order-address"></textarea></div><button class="btn-primary" onclick="saveOrderChanges()">Сохранить</button></div>
     </div>
-
-    <!-- Мастер Фото -->
-    <div id="photo-wizard-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn" onclick="closeModal('photo-wizard-modal')">&times;</span>
-            <h3>📸 Мастер Фото</h3>
-            <input type="file" id="wiz-file-input" accept="image/*" style="display:none">
-            <div id="wiz-grid" class="products-grid"></div>
-        </div>
-    </div>
+    <!-- Photo Wizard -->
+    <div id="photo-wizard-modal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closeModal('photo-wizard-modal')">&times;</span><h3>📸 Мастер Фото</h3><input type="file" id="wiz-file-input" accept="image/*" style="display:none"><div id="wiz-grid" class="products-grid"></div></div></div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
@@ -328,6 +311,7 @@
         let userData = null, products = [], cart = [], currentCategory = 'all';
         let currentPromo = { code: null, discount: 0 };
         let wizActiveId = null;
+        let currentUserOrders = []; // To store orders for detail view
 
         const phoneInput = document.getElementById('phone');
         phoneInput.addEventListener('input', function(e) { this.value = this.value.replace(/\D/g, ''); });
@@ -363,40 +347,33 @@
             if (data.success) { userData = data.user; showMainScreen(); loadCatalog(); } else alert('Ошибка регистрации');
         }
 
-        // --- ПРОФИЛЬ ---
+        // --- PROFILE LOGIC ---
         async function openProfile() {
             if (!userData) return;
-            // Обновляем данные (баллы)
             userData = await checkUserRegistration(userData.telegram_id);
             document.getElementById('profile-name').textContent = userData.name;
             document.getElementById('profile-phone').textContent = userData.phone;
             document.getElementById('profile-points').textContent = userData.points || 0;
             document.getElementById('profile-ref').textContent = userData.referral_code;
 
-            // Грузим историю
             const container = document.getElementById('order-history-list');
             container.innerHTML = 'Загрузка...';
             try {
                 const res = await fetch(`${API_URL}/api/user/${userData.telegram_id}/orders`);
-                const orders = await res.json();
-                if(orders.length === 0) container.innerHTML = 'Нет заказов';
+                currentUserOrders = await res.json();
+                if(currentUserOrders.length === 0) container.innerHTML = 'Нет заказов';
                 else {
-                    container.innerHTML = orders.map(o => {
+                    container.innerHTML = currentUserOrders.map((o, idx) => {
                         const date = new Date(o.created_at).toLocaleDateString('ru-RU');
                         const statusClass = o.status === 'completed' ? 'completed' : '';
-                        const statusText = o.status === 'completed' ? 'Выполнен' : 'Активен';
-                        let extraInfo = '';
-                        if(o.promocode) extraInfo += ` | Промо: ${o.promocode}`;
-                        if(o.points_used > 0) extraInfo += ` | Баллы: -${o.points_used}`;
                         return `
-                        <div class="order-history-item">
+                        <div class="order-history-item" onclick="openOrderDetails(${idx})">
                             <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
                                 <b>Заказ #${o.id}</b>
-                                <span class="order-status ${statusClass}">${statusText}</span>
+                                <span class="order-status ${statusClass}">${o.status === 'completed' ? 'Выполнен' : 'Активен'}</span>
                             </div>
                             <div style="font-size:12px; color:#666;">${date}</div>
                             <div style="font-size:14px; margin-top:4px;">Сумма: <b>${o.total_price} ₽</b></div>
-                            <div style="font-size:11px; color:#999;">${extraInfo}</div>
                         </div>`;
                     }).join('');
                 }
@@ -404,15 +381,32 @@
             document.getElementById('profile-modal').classList.add('active');
         }
 
-        // --- КАТАЛОГ И КОРЗИНА ---
+        function openOrderDetails(idx) {
+            const o = currentUserOrders[idx];
+            if(!o) return;
+            document.getElementById('detail-id').textContent = o.id;
+            document.getElementById('detail-status').textContent = o.status === 'completed' ? 'Выполнен' : 'Активен';
+            document.getElementById('detail-promo').textContent = o.promocode || 'Нет';
+            document.getElementById('detail-points').textContent = o.points_used || 0;
+            document.getElementById('detail-total').textContent = o.total_price + ' ₽';
+            
+            let items = [];
+            try { items = typeof o.details === 'string' ? JSON.parse(o.details) : o.details; } catch(e){}
+            
+            document.getElementById('detail-items').innerHTML = items.map(i => `
+                <div style="display:flex; justify-content:space-between; font-size:14px; margin-bottom:5px;">
+                    <span>${i.name} (x${i.quantity})</span>
+                    <span>${i.price * i.quantity} ₽</span>
+                </div>
+            `).join('');
+
+            document.getElementById('order-details-modal').classList.add('active');
+        }
+
+        // --- CATALOG & CART ---
         async function loadCatalog() { 
             const container = document.getElementById('products-container'); 
-            if (products.length === 0) { 
-                try { 
-                    const res = await fetch(`${API_URL}/api/products`); 
-                    products = await res.json(); 
-                } catch (e) { container.innerHTML = '<p>Ошибка</p>'; return; } 
-            } 
+            if (products.length === 0) { try { const res = await fetch(`${API_URL}/api/products`); products = await res.json(); } catch (e) { container.innerHTML = '<p>Ошибка</p>'; return; } } 
             filterProducts(); 
         }
         function setCategory(cat) { currentCategory = cat; document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active')); event.target.classList.add('active'); filterProducts(); }
@@ -433,364 +427,169 @@
                     ? (cartItem ? `<div class="qty-control-catalog"><button onclick="changeQty(${p.id}, -1)">-</button><span>${cartItem.quantity}</span><button onclick="changeQty(${p.id}, 1)">+</button></div>` 
                                 : `<button class="add-to-cart-btn" onclick="addToCart(${p.id})">В корзину</button>`)
                     : `<div style="background:#eee; padding:5px; border-radius:8px; font-size:12px;">Нет в наличии</div>`;
-                
                 const el = document.createElement('div'); el.className = 'product-card';
                 el.innerHTML = `<div class="product-image"><img src="${p.image_url || ''}"></div><div class="product-name">${p.name}</div><div class="product-price">${p.price} ₽</div>${btn}`;
                 container.appendChild(el);
             });
         }
-
         async function fetchCart() { if (!userData) return; try { const res = await fetch(`${API_URL}/api/cart/${userData.telegram_id}`); cart = await res.json(); updateCartBadge(); filterProducts(); } catch (e) {} }
         async function addToCart(id) { await fetch(`${API_URL}/api/cart/add`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id }) }); await fetchCart(); if(document.getElementById('cart-modal').classList.contains('active')) openCart(); }
         async function changeQty(id, delta) { if(delta === 1) await addToCart(id); else await removeFromCart(id); }
         async function removeFromCart(id) { await fetch(`${API_URL}/api/cart/remove`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, productId: id }) }); await fetchCart(); if(document.getElementById('cart-modal').classList.contains('active')) openCart(); }
         function updateCartBadge() { const c = cart.reduce((s, i) => s + i.quantity, 0); const b = document.getElementById('cart-badge'); b.textContent = c; b.style.display = c > 0 ? 'flex' : 'none'; }
 
-        // --- ЛОГИКА РАСЧЕТА КОРЗИНЫ ---
         async function openCart() {
             await fetchCart();
-            userData = await checkUserRegistration(userData.telegram_id); // Обновляем баллы
-            
-            const modal = document.getElementById('cart-modal');
+            userData = await checkUserRegistration(userData.telegram_id);
+            document.getElementById('cart-modal').classList.add('active');
             const container = document.getElementById('cart-items-container');
             const footer = document.getElementById('cart-footer');
-            
-            modal.classList.add('active');
             container.innerHTML = '';
-            
-            if (cart.length === 0) {
-                container.innerHTML = '<p style="text-align:center">Корзина пуста</p>';
-                footer.style.display = 'none';
-                return;
-            }
-
+            if (cart.length === 0) { container.innerHTML = '<p style="text-align:center">Корзина пуста</p>'; footer.style.display = 'none'; return; }
             footer.style.display = 'block';
             cart.forEach(i => {
                 container.innerHTML += `<div class="cart-item"><div class="cart-item-info"><div class="cart-item-title">${i.name}</div><div class="cart-item-price">${i.price} x ${i.quantity} = ${i.price*i.quantity}</div></div><div style="display:flex;gap:10px;"><button class="qty-btn" onclick="removeFromCart(${i.product_id})">-</button><span style="line-height:28px">${i.quantity}</span><button class="qty-btn" onclick="addToCart(${i.product_id})">+</button></div></div>`;
             });
-            
             document.getElementById('cart-user-points').textContent = userData.points || 0;
-            // Сброс при открытии
             document.getElementById('promo-input').value = '';
             currentPromo = { code: null, discount: 0 };
             document.getElementById('use-points-check').checked = false;
-            
             updateCartTotals();
         }
-
         async function applyPromo() {
             const code = document.getElementById('promo-input').value.trim();
             if(!code) return;
             try {
                 const res = await fetch(`${API_URL}/api/promocode/check/${code}`);
                 const data = await res.json();
-                if(data.success) {
-                    currentPromo = { code: code, discount: data.discount };
-                    alert(`Промокод применен! Скидка ${data.discount}%`);
-                    updateCartTotals();
-                } else {
-                    alert('Неверный промокод');
-                    currentPromo = { code: null, discount: 0 };
-                    updateCartTotals();
-                }
-            } catch(e) { alert('Ошибка сети'); }
+                if(data.success) { currentPromo = { code: code, discount: data.discount }; alert(`Скидка ${data.discount}%`); } 
+                else { alert('Неверный код'); currentPromo = { code: null, discount: 0 }; }
+                updateCartTotals();
+            } catch(e) { alert('Ошибка'); }
         }
-
         function updateCartTotals() {
             let subtotal = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-            
-            // 1. Скидка
-            let discountAmount = 0;
-            if (currentPromo.discount > 0) {
-                discountAmount = Math.floor(subtotal * (currentPromo.discount / 100));
-            }
+            let discountAmount = Math.floor(subtotal * (currentPromo.discount / 100));
             let priceAfterPromo = subtotal - discountAmount;
-
-            // 2. Баллы (15% от остатка)
             let pointsUsed = 0;
-            const usePoints = document.getElementById('use-points-check').checked;
-            if (usePoints && userData.points > 0) {
-                const maxPoints = Math.floor(priceAfterPromo * 0.15);
-                pointsUsed = Math.min(userData.points, maxPoints);
-            }
+            if (document.getElementById('use-points-check').checked && userData.points > 0) pointsUsed = Math.min(userData.points, Math.floor(priceAfterPromo * 0.15));
             let finalPrice = Math.ceil(priceAfterPromo - pointsUsed);
-
-            // UI
             document.getElementById('sum-items').textContent = subtotal + ' ₽';
-            
-            const promoRow = document.getElementById('row-discount');
-            if (discountAmount > 0) {
-                promoRow.style.display = 'flex';
-                document.getElementById('promo-percent').textContent = currentPromo.discount;
-                document.getElementById('sum-discount').textContent = discountAmount;
-            } else { promoRow.style.display = 'none'; }
-
-            const pointsRow = document.getElementById('row-points');
-            if (pointsUsed > 0) {
-                pointsRow.style.display = 'flex';
-                document.getElementById('sum-points').textContent = pointsUsed;
-            } else { pointsRow.style.display = 'none'; }
-
-            const finalEl = document.getElementById('cart-final-price');
-            if (finalPrice < subtotal) {
-                finalEl.innerHTML = `<span class="old-price">${subtotal}</span> ${finalPrice} ₽`;
-            } else {
-                finalEl.textContent = finalPrice + ' ₽';
-            }
+            document.getElementById('row-discount').style.display = discountAmount > 0 ? 'flex' : 'none';
+            document.getElementById('sum-discount').textContent = discountAmount;
+            document.getElementById('promo-percent').textContent = currentPromo.discount;
+            document.getElementById('row-points').style.display = pointsUsed > 0 ? 'flex' : 'none';
+            document.getElementById('sum-points').textContent = pointsUsed;
+            document.getElementById('cart-final-price').innerHTML = finalPrice < subtotal ? `<span class="old-price">${subtotal}</span> ${finalPrice} ₽` : finalPrice + ' ₽';
         }
-
-        function startCheckout() {
-            document.getElementById('cart-modal').classList.remove('active');
-            document.getElementById('age-warning-modal').classList.add('active');
-        }
-        function showAddressForm() {
-            document.getElementById('age-warning-modal').classList.remove('active');
-            document.getElementById('address-modal').classList.add('active');
-        }
+        function startCheckout() { document.getElementById('cart-modal').classList.remove('active'); document.getElementById('age-warning-modal').classList.add('active'); }
+        function showAddressForm() { document.getElementById('age-warning-modal').classList.remove('active'); document.getElementById('address-modal').classList.add('active'); }
         async function submitOrder() {
             const addr = document.getElementById('delivery-address').value;
-            const comment = document.getElementById('order-comment').value;
-            const usePoints = document.getElementById('use-points-check').checked;
-            
             if(!addr) return alert('Введите адрес');
-            
-            try {
-                const res = await fetch(`${API_URL}/api/order`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        userId: userData.telegram_id,
-                        address: addr,
-                        comment: comment,
-                        promoCode: currentPromo.code,
-                        usePoints: usePoints
-                    })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    alert('Заказ оформлен!');
-                    closeModal('address-modal');
-                    fetchCart();
-                } else { alert('Ошибка: ' + (data.message || 'Unknown')); }
-            } catch(e) { alert('Ошибка сети'); }
+            await fetch(`${API_URL}/api/order`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, address: addr, comment: document.getElementById('order-comment').value, promoCode: currentPromo.code, usePoints: document.getElementById('use-points-check').checked }) });
+            alert('Заказ оформлен!'); closeModal('address-modal'); fetchCart();
         }
 
-        // --- АДМИН ПАНЕЛЬ ---
-        function openAdminPanel() { 
-            document.getElementById('admin-modal').classList.add('active'); 
-            switchAdminSection('stats'); 
+        // --- ADMIN PANEL (SIDEBAR + ORIGINAL TABS) ---
+        function toggleSidebar() {
+            document.getElementById('admin-sidebar').classList.toggle('open');
+            document.querySelector('.sidebar-overlay').classList.toggle('open');
         }
-        function switchAdminSection(val) {
-            document.querySelectorAll('.admin-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(`admin-${val}`).classList.add('active');
-            
-            if(val === 'stats') loadStats();
-            if(val === 'orders') loadAdminOrders('active');
-            if(val === 'products') loadAdminProducts();
-            if(val === 'promocodes') loadPromocodes();
-            if(val === 'db') loadDbTable();
+        function openAdminPanel() { document.getElementById('admin-modal').classList.add('active'); switchAdminTab('stats'); }
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`admin-${tab}-tab`).classList.add('active');
+            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('admin-sidebar').classList.remove('open');
+            document.querySelector('.sidebar-overlay').classList.remove('open');
+            if(tab === 'stats') loadStats();
+            if(tab === 'orders') loadAdminOrders('active');
+            if(tab === 'products') loadAdminProducts();
+            if(tab === 'promocodes') loadPromocodes();
+            if(tab === 'db') loadDbTable();
         }
 
-        // Статистика
         async function loadStats() {
             try {
                 const res = await fetch(`${API_URL}/api/admin/stats?userId=${userData.telegram_id}`);
                 const d = await res.json();
-                document.getElementById('admin-stats-container').innerHTML = `
-                    <div style="background:#f0f0f0; padding:15px; border-radius:10px;">
-                        <div>Продажи: <b>${d.revenue} ₽</b></div>
-                        <div>Себест: <b>${d.cogs} ₽</b></div>
-                        <div>Расходы: <b>${d.expenses} ₽</b></div>
-                        <div style="margin-top:10px; border-top:1px solid #ccc; padding-top:5px; font-size:18px;">Прибыль: <b style="color:${d.netProfit>0?'green':'red'}">${d.netProfit} ₽</b></div>
-                    </div>`;
+                document.getElementById('admin-stats-container').innerHTML = `<div style="background:#f0f0f0; padding:15px; border-radius:10px;"><div>Продажи: <b>${d.revenue} ₽</b></div><div>Себест: <b>${d.cogs} ₽</b></div><div>Расходы: <b>${d.expenses} ₽</b></div><div style="margin-top:10px; border-top:1px solid #ccc; padding-top:5px; font-size:18px;">Прибыль: <b style="color:${d.netProfit>0?'green':'red'}">${d.netProfit} ₽</b></div></div>`;
             } catch(e){}
         }
-
-        // Промокоды
         async function loadPromocodes() {
             const container = document.getElementById('admin-promo-list');
-            try {
-                const res = await fetch(`${API_URL}/api/admin/promocodes?userId=${userData.telegram_id}`);
-                const data = await res.json();
-                container.innerHTML = data.map(p => `
-                    <div class="promo-item">
-                        <div><b>${p.code}</b> (${p.discount_percent}%)</div>
-                        <button class="btn-primary btn-danger" style="width:auto; margin:0; padding:5px 10px; font-size:12px;" onclick="deletePromo(${p.id})">Удалить</button>
-                    </div>
-                `).join('');
-            } catch(e){ container.innerHTML = 'Ошибка'; }
+            try { const res = await fetch(`${API_URL}/api/admin/promocodes?userId=${userData.telegram_id}`); const data = await res.json(); container.innerHTML = data.map(p => `<div class="promo-item"><div><b>${p.code}</b> (${p.discount_percent}%)</div><button class="btn-primary btn-danger" style="width:auto; margin:0; padding:5px 10px; font-size:12px;" onclick="deletePromo(${p.id})">Del</button></div>`).join(''); } catch(e){}
         }
-        async function addPromo() {
-            const code = document.getElementById('new-promo-code').value;
-            const disc = document.getElementById('new-promo-percent').value;
-            if(!code || !disc) return;
-            await fetch(`${API_URL}/api/admin/promocode`, {
-                method: 'POST', headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ userId: userData.telegram_id, code, discount: disc })
-            });
-            document.getElementById('new-promo-code').value = '';
-            loadPromocodes();
-        }
-        async function deletePromo(id) {
-            if(!confirm('Удалить?')) return;
-            await fetch(`${API_URL}/api/admin/promocode/${id}`, { method: 'DELETE', headers: {'user-id': userData.telegram_id} });
-            loadPromocodes();
-        }
+        async function addPromo() { await fetch(`${API_URL}/api/admin/promocode`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id, code: document.getElementById('new-promo-code').value, discount: document.getElementById('new-promo-percent').value }) }); loadPromocodes(); }
+        async function deletePromo(id) { if(confirm('Del?')) { await fetch(`${API_URL}/api/admin/promocode/${id}`, { method: 'DELETE', headers: {'user-id': userData.telegram_id} }); loadPromocodes(); } }
 
-        // Заказы
         async function loadAdminOrders(status) {
             document.getElementById('btn-ord-active').classList.toggle('active', status === 'active');
             document.getElementById('btn-ord-comp').classList.toggle('active', status === 'completed');
-            const container = document.getElementById('admin-orders-list');
-            container.innerHTML = 'Загрузка...';
+            const container = document.getElementById('admin-orders-list'); container.innerHTML = 'Загрузка...';
             try {
                 const res = await fetch(`${API_URL}/api/admin/orders?userId=${userData.telegram_id}&status=${status}`);
                 const orders = await res.json();
                 if(orders.length === 0) return container.innerHTML = 'Нет заказов';
-                
                 container.innerHTML = orders.map(o => {
-                    const date = new Date(o.created_at).toLocaleDateString('ru-RU');
-                    const items = o.items.map(i => `${i.name} (${i.quantity})`).join(', ');
-                    let extra = '';
-                    if (o.promocode) extra += `<br>🎫 Промо: <b>${o.promocode}</b>`;
-                    if (o.points_used > 0) extra += `<br>💎 Баллы: <b>-${o.points_used}</b>`;
-                    if (o.initial_price && o.initial_price > o.total_price) extra += `<br><span class="old-price">${o.initial_price}</span>`;
-                    
-                    let btns = '';
-                    if(status === 'active') {
-                        btns = `<button class="btn-green" style="width:100%; margin-top:5px; border:none; border-radius:5px; padding:10px;" onclick="completeOrder(${o.id})">Выполнить ✅</button>`;
-                    }
-
-                    return `
-                        <div style="background:#fff; border:1px solid #ccc; border-radius:8px; padding:10px; margin-bottom:10px;">
-                            <div style="font-weight:bold;">#${o.id} ${o.user_data?.name} <span style="font-weight:normal; font-size:12px;">${date}</span></div>
-                            <div style="font-size:13px; color:#555;">${items}</div>
-                            <div style="margin-top:5px; font-size:16px;">Итого: <b>${o.total_price} ₽</b> ${extra}</div>
-                            <div style="font-size:13px; margin-top:5px; background:#f9f9f9; padding:5px;">${o.address}</div>
-                            ${btns}
-                        </div>
-                    `;
+                    const items = o.items.map(i => `${i.name} (x${i.quantity})`).join(', ');
+                    let extra = ''; if (o.promocode) extra += `<br>🎫 Промо: <b>${o.promocode}</b>`; if (o.points_used > 0) extra += `<br>💎 Баллы: <b>-${o.points_used}</b>`;
+                    let btns = status === 'active' ? `<button class="btn-primary btn-danger" style="margin-top:5px; padding:8px;" onclick="editOrder(${o.id}, '${o.address.replace(/\n/g,' ')}', ${o.total_price})">Ред.</button><button class="btn-green" style="margin-top:5px; padding:10px; width:100%; border:none;" onclick="completeOrder(${o.id})">Выполнить</button>` : '';
+                    return `<div class="order-admin-card"><div style="font-weight:bold;">#${o.id} ${o.user_data?.name}</div><div style="font-size:13px; color:#555;">${items}</div><div style="margin-top:5px;">Итого: <b>${o.total_price} ₽</b> ${extra}</div><div style="font-size:13px; margin-top:5px;">${o.address}</div>${btns}</div>`;
                 }).join('');
-            } catch(e){ container.innerHTML = 'Ошибка'; }
+            } catch(e){}
         }
-        async function completeOrder(id) {
-            if(!confirm('Завершить?')) return;
-            await fetch(`${API_URL}/api/admin/order/${id}/done`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId: userData.telegram_id}) });
-            loadAdminOrders('active');
-        }
+        async function completeOrder(id) { if(confirm('OK?')) { await fetch(`${API_URL}/api/admin/order/${id}/done`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId: userData.telegram_id}) }); loadAdminOrders('active'); } }
+        function editOrder(id, addr, total) { document.getElementById('edit-order-id').value = id; document.getElementById('edit-order-id-display').textContent = id; document.getElementById('edit-order-address').value = addr; document.getElementById('edit-order-total').value = total; document.getElementById('edit-order-modal').classList.add('active'); }
+        async function saveOrderChanges() { await fetch(`${API_URL}/api/admin/order/${document.getElementById('edit-order-id').value}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId: userData.telegram_id, address:document.getElementById('edit-order-address').value, total_price:document.getElementById('edit-order-total').value, details:[], comment:''}) }); closeModal('edit-order-modal'); loadAdminOrders('active'); }
 
-        // Товары
         async function loadAdminProducts() {
             const c = document.getElementById('admin-products-list');
             try {
                 const res = await fetch(`${API_URL}/api/products`);
                 const pp = await res.json();
-                c.innerHTML = pp.map(p => `
-                    <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:5px 0;">
-                        <div><b>${p.name}</b> (${p.stock} шт)</div>
-                        <button class="delete-prod-btn" onclick="deleteProduct(${p.id})">🗑️</button>
-                    </div>
-                `).join('');
+                products = pp;
+                c.innerHTML = pp.map(p => `<div style="border-bottom:1px solid #eee; padding:10px 0;"><div style="display:flex; justify-content:space-between;"><div><b>${p.name}</b> <span style="color:${p.stock>0?'green':'red'}">${p.stock} шт</span></div><button class="delete-prod-btn" onclick="deleteProduct(${p.id})">Del</button></div><div class="stock-control"><input type="number" id="stock-val-${p.id}" class="stock-input"><button onclick="updateProdStock(${p.id},1)">+</button><button onclick="updateProdStock(${p.id},-1)">-</button></div></div>`).join('');
             } catch(e){}
         }
-
+        async function updateProdStock(id, dir) { const val = document.getElementById(`stock-val-${id}`).value; if(!val) return; await fetch(`${API_URL}/api/admin/product/stock`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId: userData.telegram_id, productId:id, change: val*dir}) }); loadAdminProducts(); }
+        async function deleteProduct(id) { if(confirm('Del?')) { await fetch(`${API_URL}/api/admin/product/${id}`, {method:'DELETE', headers:{'user-id':userData.telegram_id.toString()}}); loadAdminProducts(); } }
         async function addNewProduct() {
-            const formData = new FormData();
-            formData.append('userId', userData.telegram_id);
-            formData.append('category', document.getElementById('new-prod-cat').value);
-            formData.append('name', document.getElementById('new-prod-name').value);
-            formData.append('price', document.getElementById('new-prod-sell').value);
-            formData.append('purchase_price', document.getElementById('new-prod-buy').value);
-            formData.append('stock', document.getElementById('new-prod-stock').value);
-            formData.append('photo', document.getElementById('new-prod-file').files[0]);
-            
-            if(!formData.get('name') || !formData.get('price')) return alert('Поля?');
-
-            await fetch(`${API_URL}/api/admin/product`, {method:'POST', body:formData});
-            loadAdminProducts();
+            const formData = new FormData(); formData.append('userId', userData.telegram_id); formData.append('category', document.getElementById('new-prod-cat').value); formData.append('name', document.getElementById('new-prod-name').value); formData.append('price', document.getElementById('new-prod-sell').value); formData.append('purchase_price', document.getElementById('new-prod-buy').value); formData.append('stock', document.getElementById('new-prod-stock').value); formData.append('photo', document.getElementById('new-prod-file').files[0]);
+            await fetch(`${API_URL}/api/admin/product`, {method:'POST', body:formData}); loadAdminProducts();
         }
-        async function deleteProduct(id) { if(!confirm('Удалить?')) return; await fetch(`${API_URL}/api/admin/product/${id}`, {method:'DELETE', headers:{'user-id':userData.telegram_id.toString()}}); loadAdminProducts(); }
 
-        // CSV
         function processCsvFile() {
-            const fileInput = document.getElementById('csv-file-input');
-            const file = fileInput.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                const text = e.target.result;
-                const rows = text.split('\n');
-                const productsToUpload = [];
-                rows.forEach((row, index) => {
-                    if (!row.trim()) return;
-                    let cols = row.split(';'); if (cols.length < 2) cols = row.split(',');
-                    if (cols.length < 5 || (index === 0 && (cols[0].toLowerCase().includes('кат') || cols[0].toLowerCase().includes('cat')))) return;
-                    const clean = (val) => val ? val.trim().replace(/^"|"$/g, '') : '';
-                    productsToUpload.push({
-                        category: clean(cols[0]) || 'Разное', name: clean(cols[1]), description: clean(cols[2]),
-                        purchase_price: parseFloat(clean(cols[3]).replace(',', '.')) || 0, price: parseFloat(clean(cols[4]).replace(',', '.')) || 0, stock: parseInt(clean(cols[5])) || 0
-                    });
-                });
-                if (productsToUpload.length > 0 && confirm(`Найдено ${productsToUpload.length}. Загрузить?`)) {
-                    await fetch(`${API_URL}/api/admin/products/batch`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: userData.telegram_id, products: productsToUpload }) });
-                    loadAdminProducts();
-                }
-                fileInput.value = '';
-            };
-            reader.readAsText(file, 'utf-8'); 
+            const file = document.getElementById('csv-file-input').files[0]; if(!file) return;
+            const reader = new FileReader(); reader.onload = async function(e) {
+                const rows = e.target.result.split('\n'); const productsToUpload = [];
+                rows.forEach((row, i) => { if(!row.trim()) return; let cols=row.split(';'); if(cols.length<2) cols=row.split(','); if(cols.length<5) return; const cl=(v)=>v?v.trim().replace(/^"|"$/g,''):''; productsToUpload.push({category:cl(cols[0])||'Разное', name:cl(cols[1]), description:cl(cols[2]), purchase_price:parseFloat(cl(cols[3]).replace(',','.'))||0, price:parseFloat(cl(cols[4]).replace(',','.'))||0, stock:parseInt(cl(cols[5]))||0}); });
+                if(confirm(`Найдено ${productsToUpload.length}. Загрузить?`)) { await fetch(`${API_URL}/api/admin/products/batch`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId:userData.telegram_id, products:productsToUpload}) }); loadAdminProducts(); }
+            }; reader.readAsText(file);
         }
 
-        // Мастер Фото
         function openPhotoWizard() {
-            const noPhotoProds = products.filter(p => !p.image_url || p.image_url.includes('placeholder'));
-            const container = document.getElementById('wiz-grid');
-            if (noPhotoProds.length === 0) return alert('Все товары с фото!');
-            container.innerHTML = noPhotoProds.map(p => `
-                <div class="product-card" onclick="triggerWizUpload(${p.id})">
-                    <div class="product-image"><img src="${p.image_url || ''}" id="wiz-img-${p.id}"></div>
-                    <div style="font-weight:bold;">${p.name}</div>
-                    <div style="font-size:12px; color:#999;">Нажмите чтобы добавить фото</div>
-                </div>
-            `).join('');
+            const noPhoto = products.filter(p=>!p.image_url||p.image_url.includes('placeholder')); if(noPhoto.length===0) return alert('Все с фото!');
+            document.getElementById('wiz-grid').innerHTML = noPhoto.map(p=>`<div class="product-card" onclick="triggerWiz(${p.id})"><div class="product-image"><img src="${p.image_url}" id="wiz-img-${p.id}"></div><div>${p.name}</div></div>`).join('');
             document.getElementById('photo-wizard-modal').classList.add('active');
         }
-        function triggerWizUpload(id) { wizActiveId = id; document.getElementById('wiz-file-input').click(); }
+        function triggerWiz(id) { wizActiveId=id; document.getElementById('wiz-file-input').click(); }
         document.getElementById('wiz-file-input').addEventListener('change', async function(e) {
-            const file = e.target.files[0];
-            if (!file || !wizActiveId) return;
-            const formData = new FormData(); formData.append('userId', userData.telegram_id); formData.append('photo', file);
-            const res = await fetch(`${API_URL}/api/admin/product/${wizActiveId}/image`, { method: 'POST', body: formData });
-            const data = await res.json();
-            if (data.success) { document.getElementById(`wiz-img-${wizActiveId}`).src = data.imageUrl; }
-            this.value = '';
+            const f=e.target.files[0]; if(!f || !wizActiveId) return; const fd=new FormData(); fd.append('userId', userData.telegram_id); fd.append('photo', f);
+            const res = await fetch(`${API_URL}/api/admin/product/${wizActiveId}/image`, {method:'POST', body:fd}); const d=await res.json(); if(d.success) document.getElementById(`wiz-img-${wizActiveId}`).src=d.imageUrl;
         });
 
-        // БД Менеджер
         async function loadDbTable() {
-            const t = document.getElementById('db-table-select').value;
-            const c = document.getElementById('db-view-container');
-            c.innerHTML = 'Загрузка...';
-            try {
-                const res = await fetch(`${API_URL}/api/admin/db/${t}?userId=${userData.telegram_id}`);
-                const data = await res.json();
-                if(data.length === 0) return c.innerHTML = 'Пусто';
-                const cols = Object.keys(data[0]);
-                let html = '<table style="width:100%; border-collapse:collapse; font-size:12px;"><thead><tr><th>Act</th>' + cols.map(k=>`<th>${k}</th>`).join('') + '</tr></thead><tbody>';
-                html += data.map(row => `<tr><td><button onclick="deleteDbRecord(${row.id})">Del</button></td>` + cols.map(k=>`<td style="border:1px solid #ddd; padding:4px;">${row[k]}</td>`).join('') + '</tr>').join('');
-                c.innerHTML = html + '</tbody></table>';
-            } catch(e){ c.innerHTML = 'Ошибка'; }
-        }
-        async function deleteDbRecord(id) {
-            if(!confirm('Удалить?')) return;
-            const t = document.getElementById('db-table-select').value;
-            await fetch(`${API_URL}/api/admin/db/${t}/${id}`, { method: 'DELETE', headers: {'user-id': userData.telegram_id} });
-            loadDbTable();
+            const t = document.getElementById('db-table-select').value; const c = document.getElementById('db-view-container'); c.innerHTML='Загрузка...';
+            try { const res = await fetch(`${API_URL}/api/admin/db/${t}?userId=${userData.telegram_id}`); const data = await res.json(); if(data.length===0) return c.innerHTML='Пусто';
+                const cols = Object.keys(data[0]); c.innerHTML = '<table class="db-table"><thead><tr>'+cols.map(k=>`<th>${k}</th>`).join('')+'</tr></thead><tbody>'+data.map(r=>`<tr>`+cols.map(k=>`<td>${r[k]}</td>`).join('')+`</tr>`).join('')+'</tbody></table>';
+            } catch(e){ c.innerHTML='Ошибка'; }
         }
 
-        // Helpers
         function closeModal(id) { document.getElementById(id).classList.remove('active'); }
         async function openFAQ() { document.getElementById('faq-modal').classList.add('active'); const res = await fetch(`${API_URL}/api/faq`); document.getElementById('faq-content').innerHTML = (await res.json()).map(i => `<div><h3>${i.question}</h3><p>${i.answer}</p></div>`).join(''); }
-
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
