@@ -2317,6 +2317,22 @@ color: var(--text-color);
                 .replace(/'/g,'&#39;');
         }
 
+        function formatDateTime(ts){
+            try {
+                const d = new Date(ts);
+                if (!ts || Number.isNaN(d.getTime())) return '';
+                return d.toLocaleString('ru-RU', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch(e) {
+                return '';
+            }
+        }
+
 function getManufacturerFromName(name){
             const s = (name || '').toString().trim();
             if (!s) return '';
@@ -2780,9 +2796,11 @@ async function openProfile() {
         }
 
         list.innerHTML = orders.map(o => {
-            const date = new Date(o.created_at).toLocaleDateString('ru-RU');
+            const date = formatDateTime(o.created_at);
             const items = (o.items || []).map(i => `${i.name} x${i.quantity}`).join(', ');
-            const statusText = (o.status === 'completed') ? '✅ Выполнен' : '🕒 В обработке';
+            const statusText = (o.status === 'completed')
+                ? '✅ Выполнен'
+                : (o.status === 'pending' ? '⏳ Ожидает подтверждения' : '🕒 В обработке');
             const earned = (o.status === 'completed') ? ((o.points_awarded !== undefined && o.points_awarded !== null) ? o.points_awarded : 0) : null;
             const earnedLine = (earned !== null) ? `<div style="margin-top:6px; font-size:12px; color:#666;">⭐️ Начислено: <b>${earned}</b></div>` : '';
             return `
@@ -4031,7 +4049,7 @@ async function openProfile() {
                         const desc = escHtml((i.description || '').toString().trim());
                         return desc ? `${name} x${qty} <span style=\"color:#777;\">— ${desc}</span>` : `${name} x${qty}`;
                     }).join('<br>');
-                    const date = new Date(o.created_at).toLocaleDateString('ru-RU');
+                    const date = formatDateTime(o.created_at);
                     const nick = (o.user_data?.nickname || o.user_data?.name || '-');
                     const rawU = (o.user_data?.username || '').toString().trim().replace(/^@/, '');
                     const uHtml = rawU ? `(<a href="https://t.me/${rawU}" target="_blank">@${rawU}</a>)` : '';
@@ -4042,13 +4060,25 @@ async function openProfile() {
                     let buttons = '';
                     if (status === 'active') {
                         const itemsJson = encodeURIComponent(JSON.stringify(o.items));
-                        buttons = `
+                        const addrJs = (o.address == null ? '' : String(o.address)).replace(/\\/g,'\\\\').replace(/'/g, "\\'").replace(/\n/g,' ');
+                        const cmtJs = (o.comment == null ? '' : String(o.comment)).replace(/\\/g,'\\\\').replace(/'/g, "\\'").replace(/\n/g,' ');
+                        const editBtn = `
                             <button class="btn-primary btn-danger" style="margin-top: 5px; padding: 8px;" 
-                                onclick="editOrder(${o.id}, '${o.address.replace(/\n/g,' ')}', '${(o.comment||'').replace(/\n/g,' ')}', '${itemsJson}', ${o.total_price})">
+                                onclick="editOrder(${o.id}, '${addrJs}', '${cmtJs}', '${itemsJson}', ${o.total_price})">
                                 Редактировать
                             </button>
-                            <button class="btn-green" style="margin-top:5px; padding:10px; width:100%; border:none; border-radius:5px; color:white; font-weight:bold; cursor:pointer;" onclick="completeOrder(${o.id})">✅ Выполнено</button>
                         `;
+                        if (o.status === 'pending') {
+                            buttons = `
+                                ${editBtn}
+                                <button class="btn-green" style="margin-top:5px; padding:10px; width:100%; border:none; border-radius:5px; color:white; font-weight:bold; cursor:pointer;" onclick="acceptOrder(${o.id})">✅ Принять</button>
+                            `;
+                        } else {
+                            buttons = `
+                                ${editBtn}
+                                <button class="btn-green" style="margin-top:5px; padding:10px; width:100%; border:none; border-radius:5px; color:white; font-weight:bold; cursor:pointer;" onclick="completeOrder(${o.id})">✅ Выполнено</button>
+                            `;
+                        }
                     }
 
                     return `
@@ -4066,6 +4096,35 @@ async function openProfile() {
                     `;
                 }).join('');
             } catch(e) { container.innerHTML = 'Ошибка'; console.error(e); }
+        }
+
+        async function acceptOrder(id) {
+            if(!confirm('Принять заказ и списать товар со склада?')) return;
+            try {
+                const res = await fetch(`${API_URL}/api/admin/order/${id}/accept`, {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ userId: userData.telegram_id })
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) {
+                    if (data && data.error === 'OUT_OF_STOCK' && Array.isArray(data.items)) {
+                        const lines = data.items.map(it => {
+                            const nm = (it.name || it.product_id || 'товар');
+                            return `${nm}: нужно ${it.requested}, есть ${it.stock}`;
+                        }).join('\n');
+                        alert('Нельзя принять заказ — не хватает товара на складе:\n' + lines);
+                    } else {
+                        alert((data && data.error) ? data.error : 'Ошибка принятия заказа');
+                    }
+                    return;
+                }
+                alert('Заказ принят ✅');
+                await refreshProductsFromServer();
+                loadAdminOrders('active');
+            } catch(e) {
+                alert('Ошибка сети');
+            }
         }
 
         async function completeOrder(id) {
