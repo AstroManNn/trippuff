@@ -1757,7 +1757,7 @@ color: var(--text-color);
 
     <!-- GLOBAL FABs (kept outside screens to ensure true fixed positioning in WebView) -->
     <div id="global-fabs">
-        <div id="admin-fab" class="admin-fab" onclick="openAdminPanel()">🤖</div>
+        <div id="admin-fab" class="admin-fab" onclick="openAdminPanel()" style="display:none">🤖</div>
         <div id="cart-fab" class="cart-fab" onclick="openCart()">🛒<div id="cart-badge" class="cart-badge" style="display:none">0</div></div>
     </div>
 
@@ -2233,8 +2233,12 @@ color: var(--text-color);
                 userData = await checkUserRegistration(userId);
 
                 // 2) Upsert Telegram identity (keeps username/nickname fresh and creates user if missing)
+                const wasAdmin = !!(userData && userData.is_admin);
                 const synced = await upsertTelegramUser();
-                if (synced) userData = synced;
+                if (synced) {
+                    if (synced.is_admin === undefined) synced.is_admin = wasAdmin;
+                    userData = synced;
+                }
 
                 // 3) Fallback retry (Railway cold start / transient network)
                 if (!userData) {
@@ -2251,7 +2255,8 @@ color: var(--text-color);
                 showMainScreen();
                 await fetchCart();
                 loadCatalog();
-                if (userData.is_admin) document.getElementById('admin-fab').style.display = 'flex';
+                const adminFab = document.getElementById('admin-fab');
+                if (adminFab) adminFab.style.display = (userData && userData.is_admin) ? 'flex' : 'none';
             } catch (error) { console.error(error); }
         }
         async function checkUserRegistration(userId) {
@@ -2901,6 +2906,7 @@ async function openProfile() {
 
 
         async function openAdminPanel() {
+            if (!userData || !userData.is_admin) { alert('Доступно только администратору'); return; }
             try{ closeAdminDrawer(); }catch(e){}
             document.getElementById('admin-modal').classList.add('active');
             const container = document.getElementById('admin-stats-container');
