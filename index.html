@@ -4134,10 +4134,42 @@ async function openProfile() {
         }
 
         async function completeOrder(id) {
-            if(!confirm('Завершить заказ?')) return;
-            await fetch(`${API_URL}/api/admin/order/${id}/done`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ userId: userData.telegram_id }) });
-            loadAdminOrders('active');
+    if (!confirm('Завершить заказ?')) return;
+
+    try {
+        const res = await fetch(`${API_URL}/api/admin/order/${id}/done`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: userData.telegram_id })
+        });
+
+        let data = {};
+        try { data = await res.json(); } catch (e) { data = {}; }
+
+        if (!res.ok) {
+            if (data && data.error === 'OUT_OF_STOCK' && Array.isArray(data.details)) {
+                alert('Недостаточно товара на складе для завершения заказа.');
+            } else {
+                alert((data && data.error) ? data.error : 'Ошибка завершения заказа');
+            }
+            return;
         }
+
+        const pts = (data && data.points_awarded !== undefined) ? Number(data.points_awarded) : 0;
+        const extra = (data && data.auto_accepted) ? '\n(Заказ был в ожидании — автоматически принят и завершён)' : '';
+        const msg = `Заказ выполнен ✅${pts ? ('\nНачислено баллов: ' + pts) : ''}${extra}`;
+        alert(msg);
+
+        // На случай если "Выполнено" автоматически списало склад (когда заказ был pending)
+        if (typeof refreshProductsFromServer === 'function') await refreshProductsFromServer();
+
+        loadAdminOrders('active');
+    } catch (e) {
+        console.error(e);
+        alert('Ошибка сети при завершении заказа');
+    }
+}
+
 
         function editOrder(id, addr, cmt, itemsEncoded, currentTotal) {
             document.getElementById('edit-order-id').value = id;
